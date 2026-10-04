@@ -1,7 +1,7 @@
 # Janus – Task-Framework-Vertrag
 
-Version: 0.1.1
-Status: FREIGEGEBEN
+Version: 0.2.0
+Status: ENTWURF – erneute Freigabe erforderlich (Sprachwechsel C -> Rust)
 
 ## 1. Prinzip
 
@@ -54,14 +54,14 @@ beendet ist.
 
 ## 3. Task-Registry
 
-```c
-int janus_task_register(const janus_task_t *task);
-const janus_task_t *janus_task_find(const char *name);
-void janus_task_foreach(void (*cb)(const janus_task_t *task, void *userdata), void *userdata);
+```rust
+pub fn register(task: impl JanusTask + 'static) -> Result<(), RegistryError>;
+pub fn find(name: &str) -> Option<Arc<dyn JanusTask>>;
+pub fn for_each(f: impl FnMut(&Arc<dyn JanusTask>));
 ```
 
 Die Registry wird beim Daemon-Start befüllt. Phase 1 registriert die Tasks
-statisch; Phase 2 kann dynamisch ladbare Module (`.so`) unterstützen.
+statisch; Phase 2 kann dynamisch ladbare Module unterstützen.
 
 ## 4. Task-Katalog
 
@@ -110,18 +110,18 @@ Das Frontend nutzt diese Information, um visuelles Feedback beim Drag zu geben
 
 ## 6. Fortschrittsmeldung
 
-```c
-typedef struct {
-    int percent;           // 0–100, -1 = unbestimmt
-    uint64_t bytes_done;
-    uint64_t bytes_total;
-    uint64_t files_done;
-    uint64_t files_total;
-    const char *current_file;  // Aktuell verarbeitete Datei
-    const char *message;       // Statusmeldung
-} janus_progress_t;
+```rust
+pub struct Progress {
+	pub percent: Option<u8>,     // 0–100, None = unbestimmt
+	pub bytes_done: u64,
+	pub bytes_total: Option<u64>,
+	pub files_done: u64,
+	pub files_total: Option<u64>,
+	pub current_file: Option<String>,
+	pub message: String,
+}
 
-typedef void (*janus_progress_cb)(const janus_progress_t *progress, void *userdata);
+pub type ProgressSink = mpsc::Sender<Progress>;  // an WebSocket-Fanout
 ```
 
 Der Daemon sendet Fortschritt über WebSocket an verbundene Clients.

@@ -1,7 +1,7 @@
 # Janus – Architekturvertrag
 
-Version: 0.2.0
-Status: FREIGEGEBEN
+Version: 0.3.0
+Status: ENTWURF – erneute Freigabe erforderlich (Sprachwechsel C -> Rust)
 
 ## 1. Überblick
 
@@ -34,7 +34,7 @@ flowchart TB
 
     Browser -- "REST + WebSocket" --> Daemon
 
-    subgraph Daemon["janusd (C)"]
+    subgraph Daemon["janusd (Rust)"]
         HTTP["HTTP/WS Server"]
         Indexer["Indexer (Cache)"]
         Runner["Task-Runner (Borg-Subprozess)"]
@@ -49,16 +49,26 @@ flowchart TB
 
 ## 3. Backend: janusd
 
-- **Sprache**: ausschließlich C (C99, POSIX).
-- **HTTP/WebSocket-Server**: civetweb (eingebettet, lizenzkompatibel MIT).
-- **JSON**: cJSON (eingebettet) als Parser/Serializer für einzelne begrenzte
-  Objekte. Borg-JSONL wird inkrementell/streamend geparst; eine ganze große
-  Borg-Antwort wird niemals als cJSON-DOM im Speicher gehalten.
-- **Borg-Integration**: Subprozess-Steuerung (`posix_spawn` / `fork+exec`),
-  Parsen von `--json` / `--json-lines`-Ausgaben. Kein Python-Embedding.
+- **Sprache**: Rust (Edition 2024) – Entscheidung des Auftraggebers im
+  Architektur-Review: memory-safe by design für den Daemon, der unvetrauens-
+  wuerdige Eingaben parst (Borg-JSONL-Streams, HTTP/WS-Input). Exklusiv-
+  Entscheidungsgrund war nicht Performance, sondern Safety by Design;
+  Leistung war ohnehin nie das dominante Argument. Der Daemon bleibt ein
+  schlankes systemd-Binary ohne GC; das Projekt ist ein agentic-coding-
+  Projekt (AI-generierter Code, menschliche Pruefung durch den
+  Maintainer), wofuer Rusts compile-time-Safety den Review-Aufwand senkt.
+- **HTTP/WebSocket-Server**: axum (MIT/Apache-2.0, tokio-basiert) –
+  produktionsreifes, weitverbreitetes Ökosystem; TLS via rustls.
+- **JSON**: serde_json für einzelne begrenzte Objekte; Borg-JSONL wird
+  inkrementell/streamend geparst (serde `StreamDeserializer`-Prinzip oder
+  handgefilterter NDJSON-Reader); eine ganze große Borg-Antwort wird niemals
+  vollständig als DOM im Speicher gehalten.
+- **Borg-Integration**: Subprozess-Steuerung (`std::process::Command`,
+  asynchron via tokio), Parsen von `--json` / `--json-lines`-Ausgaben.
+  Kein Python-Embedding.
 - **Secrets**: `systemd-creds` oder `BORG_PASSCOMMAND`; niemals Klartext in
   Konfigurationsobjekten.
-- **Build**: CMake (>= 3.20), keine Autotools.
+- **Build**: cargo (Rust-Standard); CMake entfällt.
 
 ## 4. Repo-Zugriffsmodell
 
@@ -83,7 +93,7 @@ Die Persistenz ist zweistufig aufgebaut:
    (`get`, `put`, `delete`, `prefix-scan` mit begrenzten Seiten/Cursor sowie
    Batch-/Transaktionssemantik), die von **allen Fachmodulen** verwendet wird.
    Kein Fachmodul darf direkt Backend-spezifische DB-Aufrufe nutzen.
-2. **Backend-Adapter**: SQLite (libsqlite3) und PostgreSQL (libpq) als
+2. **Backend-Adapter**: SQLite (rusqlite, gebündelt) und PostgreSQL (tokio-postgres) als
    austauschbare persistente Backends hinter Adaptern der API. MariaDB als
    designierte Phase-2-Erweiterung. MongoDB wird nur bei explizitem Bedarf als
    Audit-/Event-Log-Adapter ergänzt, nicht für den Kernbestand.
@@ -131,7 +141,8 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
   verboten und per Linter/CI zu erzwingen; geschrieben wird nur `.svelte`
   und `.ts` (TypeScript `strict`, `any` verboten). Der Daemon, alle
   Build-Skripte für Artefakte und jede Logik außerhalb des Browsers bleiben
-  reines C. WASM/C-Routen sind geprüft und bewusst verworfen: kein direkter
+  reines Rust im Daemon. WASM/C-Routen für das Frontend sind geprüft und
+  bewusst verworfen: kein direkter
   DOM-Zugriff ohne JS-Klebstoff, kein reifes Komponenten-/DnD-Ökosystem,
   geschätzter Mehrfachaufwand für das interaktionsgetriebene UI.
 - Kein UI-Kit (MUI/Chakra/Bootstrap): das individuelle Objekt-Design wird
@@ -159,19 +170,21 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
 
 ## 9. Erweiterbarkeit: Task-Framework
 
-Jeder Task ist ein eigenständiger Handler mit definiertem Interface:
+Jeder Task ist ein eigenständiger Handler mit definiertem Interface
+(skizziert; verbindliche Ausgestaltung im Task-Framework-Vertrag):
 
-```c
-typedef struct janus_task {
-    const char *name;
-    const char *description;
-    janus_task_input_type_t input_type;  // PATHS, REPO, ARCHIVE, ...
-    janus_role_t required_role;
-    int (*validate)(const janus_task_ctx_t *ctx);
-    int (*execute)(const janus_task_ctx_t *ctx, janus_progress_cb progress);
-    int (*cancel)(const janus_task_ctx_t *ctx);
-} janus_task_t;
+```rust
+pub trait JanusTask: Send + Sync {
+	fn name(&self) -> &'static str;
+	fn input_type(&self) -> TaskInput;          // Paths, Repo, Archive, ...
+	fn required_role(&self) -> Role;
+	fn validate(&self, ctx: &TaskCtx) -> Result<(), TaskError>;
+	async fn execute(&self, ctx: TaskCtx, progress: ProgressSink) -> Result<(), TaskError>;
+	async fn cancel(&self, ctx: &TaskCtx) -> Result<(), TaskError>;
+}
 ```
+
+Registrierung tabellarisch (`registry: &[TaskSpec]`), kein `if/else`-Dispatch.
 
 Phase 1: `restore`, `check`.
 Phase 2: `prune`, `compact`, `mount-readonly`, `create` (neuer Snapshot).
@@ -195,7 +208,7 @@ Im Web-UI wird dieses Objekt als navigierbarer Teilbaum dargestellt.
 ## 11. Sicherheit
 
 - Kein Klartext-Passwort in Konfiguration oder Datenbank.
-- HTTPS per Reverse-Proxy oder eingebettetem TLS (civetweb unterstützt beides).
+- HTTPS per Reverse-Proxy oder eingebettetem TLS (axum/rustls unterstützt beides).
 - Session-basierte Authentifizierung (Token, httpOnly-Cookie).
 - RBAC wird bei jedem API-Aufruf geprüft, nicht nur im Frontend.
 - Rate-Limiting auf Login-Endpunkt.

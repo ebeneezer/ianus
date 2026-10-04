@@ -1,15 +1,18 @@
 # Janus – Code-Style-Vertrag
 
-Version: 0.2.0
-Status: FREIGEGEBEN
+Version: 0.3.0
+Status: ENTWURF – erneute Freigabe erforderlich (Sprachwechsel C -> Rust)
 
-## 1. C-Backend
+## 1. Backend (Rust)
 
 ### 1.1 Sprache & Standard
 
-- C99 (`-std=c99`), POSIX.1-2008; keine GNU-Erweiterungen im Kerncode.
-- Compiler: GCC oder Clang mit C99-Unterstützung.
-- Warnungen: `-Wall -Wextra -Wpedantic -Werror` in CI.
+- Rust Edition 2024; stabile Toolchain (rustup); kein `unsafe` außer mit
+  dokumentierter Begründung und Review-Vermerk (`// SAFETY:`-Kommentar reicht
+  allein nicht; jede `unsafe`-Stelle ist im Review gesondert freizugeben).
+- Warnungen als Fehler: `RUSTFLAGS="-D warnings"` in CI; `clippy` mit
+  `-D warnings`; `rustfmt` mit Tab-Einrückung (Konfiguration in `rustfmt.toml`).
+- Lints: `#![deny(missing_docs)]` für die öffentliche API des Daemon-Crates.
 
 ### 1.2 Dispatch und Effizienz
 
@@ -27,20 +30,23 @@ Status: FREIGEGEBEN
   validieren; keine Komplexität für hypothetische Engpässe hinzufügen.
 - Store-Zugriff zentral über die **eine** kanonische Store API; keine
   Subsystem-APIs oder Bypässe.
-- C-JSON-Parsing für große Borg-Ausgaben streamend; keine ganze große
-  Borg-Antwort als DOM im Speicher halten.
+- JSON-Parsing für große Borg-Ausgaben streamend (NDJSON zeilenweise);
+  keine ganze große Borg-Antwort als DOM im Speicher halten.
 - Cache begrenzt, mit explizitem Eigentum und Ref-Count-Leases.
 - Debug-Logs speichern niemals Payloads oder Secrets.
 
 ### 1.3 Namenskonventionen
 
-- Bezeichner beginnen niemals mit einem Unterstrich; reservierte C-Bezeichner bleiben unangetastet.
-- Funktionen: `janus_<modul>_<verb>()` → `janus_db_open()`, `janus_repo_index()`.
-- Typen: `janus_<name>_t` → `janus_repo_t`, `janus_job_state_t`.
-- Enums: `JANUS_<MODUL>_<WERT>` → `JANUS_JOB_RUNNING`.
-- Makros: `JANUS_<KONTEXT>_<NAME>` → `JANUS_DB_MAX_RETRIES`.
-- Lokale Variablen: snake_case, keine Präfixe.
-- Struct-Felder: snake_case.
+- Bezeichner beginnen niemals mit einem Unterstrich; keine Bezeichner, die
+  mit `std_`, `core_`, `rust_` beginnen oder gegen Rust-Keywords verstoßen.
+- Funktionen/Module: `janus_<modul>::janus_<verb>()` → `janus_db::open()`,
+  `janus_repo::index()` (Crate-intern kurze `snake_case`-Namen erlaubt, wo
+  der Modulpfad bereits den Kontext trägt).
+- Typen: `PascalCase` → `JanusRepo`, `JobState`, `TaskInput`.
+- Enums: `PascalCase` mit `PascalCase`-Varianten → `JobState::Running`.
+- Konstanten: `SCREAMING_SNAKE_CASE` → `DB_MAX_RETRIES`.
+- Lokale Variablen und Struct-Felder: snake_case, keine Präfixe.
+- Modulnamen: snake_case, `janus_<thema>` → `janus_kv`, `janus_task`.
 
 ### 1.4 Formatierung
 
@@ -52,25 +58,30 @@ Status: FREIGEGEBEN
   mehrere Dateien mit passenden Namen aufgeteilt oder refaktoriert. Die Aufteilung
   darf keine unnötigen Abstraktionen oder künstliche Fragmentierung erzeugen.
   Generierte und vendorte Dateien sind ausgenommen.
-- clang-format-Konfiguration wird im Repo hinterlegt.
+- rustfmt-Konfiguration (`rustfmt.toml`, hard_tabs, tabsize 3) wird im Repo hinterlegt.
 
 ### 1.5 Speicherverwaltung
 
-- Jede Allokation hat genau einen dokumentierten Eigentümer.
-- `janus_<modul>_create()` erzeugt, `janus_<modul>_destroy()` gibt frei – symmetrisch.
-- Rückgabewert bei Fehlern: `NULL` oder negativer int, kein `errno`-Overloading.
-- Keine globalen Variablen außer read-only Konfiguration.
+- Eigentum ist im Typsystem ausgedrückt (`Box`, `Arc`, `Rc`); jede Ressource
+  hat genau einen dokumentierten Eigentümer oder einen expliziten
+  Ref-Count-Pfad (Arc für Host-Cache-Leases).
+- RAII: Acquisition/Release über Drop; keine manuellen free-Pfade.
+- Keine globalen mutable States außer read-only Konfiguration (`OnceLock`
+  für Unveränderliches).
 
 ### 1.6 Fehlerbehandlung
 
-- Funktionen geben `int` (0 = Erfolg, < 0 = Fehler) oder `NULL`-Pointer zurück.
-- Fehlercodes als `JANUS_ERR_*`-Enums.
-- Logging über `janus_log(level, fmt, ...)` mit sd-journal-Anbindung.
+- Fehler als `thiserror`-Enums pro Modul (`janus_kv::Error`), keine Stringly-
+  typed Errors; `anyhow` nur in `main`/Tests.
+- `Result<T, E>` durchgängig; kein `.unwrap()`/`.expect()` außer in Tests
+  oder nach bewiesener Invariante mit Begründung.
+- Logging über `tracing` (Facilities `tracing-journald` für sd-journal).
 
 ### 1.7 Dokumentation
 
-- Jede öffentliche Funktion hat einen Doxygen-Kommentar über der Deklaration.
-- Jede Datei hat einen SPDX-License-Identifier-Header.
+- Jede öffentliche API (pub) hat einen Rustdoc-Kommentar (`///`), Beispiele
+  für nicht-triviale Funktionen (`/// # Examples`).
+- Jede Quelldatei trägt einen SPDX-License-Identifier-Header.
 
 ## 2. Frontend
 
@@ -85,9 +96,9 @@ Status: FREIGEGEBEN
 
 ## 3. Build & CI
 
-- CMake >= 3.20 als Build-System.
-- `compile_commands.json` wird generiert (für clangd/IDE-Integration).
-- CI: GitHub Actions mit Build + Tests + clang-format-Check + clang-tidy.
+- cargo als Build-System; `Cargo.lock` wird committet.
+- CI: GitHub Actions mit `cargo build`, `cargo clippy -- -D warnings`,
+  `cargo fmt --check`, `cargo test`, `cargo audit` (Dependency-Schwachstellen).
 
 ## 4. Versionierung
 

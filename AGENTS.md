@@ -10,22 +10,22 @@
 
 ## Code conventions
 
-- Backend: C99, POSIX. See `docs/contracts/CODESTYLE.md`.
-- C indentation: tabs only, tab size 3; K&R brace style.
-- Handwritten source files have a hard limit of 1000 characters, including whitespace and comments; refactor and split semantically into appropriately named files before exceeding it. Generated and vendored files are exempt.
+- Backend: Rust (Edition 2024). See `docs/contracts/CODESTYLE.md`.
+- Rust formatting: tabs only, tab size 3 (rustfmt.toml with hard_tabs).
+- Handwritten source files have a soft limit of 1000 characters, including whitespace and comments; refactor and split semantically into appropriately named modules/files before exceeding it. Generated and vendored files are exempt.
 - Prefer table-driven dispatch over long `if`/`else if` chains where it clarifies control flow.
 - Prioritize efficiency, code reuse, and minimal RSS; avoid unnecessary abstractions.
-- No Janus identifier may start with an underscore; do not define or use reserved C identifiers.
-- Naming: `janus_<module>_<verb>()` for functions, `janus_<name>_t` for types.
-- Build system: CMake >= 3.20.
-- All public functions require Doxygen comments.
+- No Janus identifier may start with an underscore; no reserved-identifier look-alikes.
+- Naming: modules `janus_<topic>`, types PascalCase, functions/fields snake_case.
+- Build system: cargo; `Cargo.lock` is committed.
+- All public items require Rustdoc comments.
 - Every file needs an SPDX license header.
 
 ## Architecture
 
 - See `docs/contracts/ARCHITECTURE.md` for the component overview.
-- DB abstraction via `db_driver_t` function-pointer struct.
-- Task framework via `janus_task_t` registration interface.
+- KV store abstraction via one canonical access API (no backend-specific calls outside adapters).
+- Task framework via `JanusTask` trait registry.
 - Borg interaction exclusively via subprocess + JSON parsing.
 
 ## Working language and communication
