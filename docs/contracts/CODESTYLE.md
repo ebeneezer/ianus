@@ -1,7 +1,7 @@
 # Janus – Code-Style-Vertrag
 
-Version: 0.1.5
-Status: FREIGEGEBEN
+Version: 0.1.6
+Status: ENTWURF – erneute Freigabe erforderlich (Frontend-Stack-Festlegung)
 
 ## 1. C-Backend
 
