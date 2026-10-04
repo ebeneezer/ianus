@@ -14,7 +14,7 @@ operations — or any other Borg task — before executing them.
 
 ## Architecture
 
-- **Backend**: C daemon (`janusd`) with embedded HTTP/WebSocket server
+- **Backend**: Rust daemon (`janusd`) with embedded HTTP/WebSocket server
 - **Frontend**: SPA with drag-and-drop workflow
 - **Database**: Pluggable backend (SQLite for local, PostgreSQL for multi-user)
 - **Borg integration**: Subprocess control, JSON output parsing
