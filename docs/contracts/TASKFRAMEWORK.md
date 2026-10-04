@@ -1,6 +1,6 @@
 # Janus – Task-Framework-Vertrag
 
-Version: 0.2.0
+Version: 0.2.1
 Status: ENTWURF – erneute Freigabe erforderlich (Sprachwechsel C -> Rust)
 
 ## 1. Prinzip
@@ -86,6 +86,7 @@ statisch; Phase 2 kann dynamisch ladbare Module unterstützen.
 | diff      | Zwei Archive               | `borg diff`                  | Zeigt Unterschiede zwischen Archiven|
 | export-tar| Archiv + Pfade             | `borg export-tar`            | Exportiert als TAR-Archiv           |
 | key       | Repository                 | `borg key change-passphrase` | Ändert Repository-Passphrase        |
+| break-lock| Repository                 | `borg break-lock`            | Entfernt stale Locks nach SIGKILL  |
 
 ### Phase 3+
 

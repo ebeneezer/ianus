@@ -1,6 +1,6 @@
 # Janus – Architekturvertrag
 
-Version: 0.3.0
+Version: 0.3.1
 Status: ENTWURF – erneute Freigabe erforderlich (Sprachwechsel C -> Rust)
 
 ## 1. Überblick
@@ -21,6 +21,15 @@ Zähler und Status; Cancel-Anfragen gehen vom Frontend an den Daemon und werden 
 Task-Runner, DB-Adapter und Borg-Subprozess weitergegeben. Nicht jede zugrunde
 liegende Borg-/DB-Operation ist sofort abbrechbar; der Vertrag verspricht keinen
 sofortigen Abbruch, sondern einen sauberen, nachvollziehbaren Ablauf.
+
+**Abbruch-Eskalationsleiter für Borg-Subprozesse** (Entscheidung des
+Auftraggebers): Cancel-Anfrage → SIGTERM an die Prozessgruppe des Kindes →
+kurze Grace-Periode → SIGKILL (letzte Instanz, „der Hammer"). Ein per SIGKILL
+beendetes Borg kann stale Repository-Locks hinterlassen; der Daemon meldet
+dies offen und bietet die Lock-Bereinigung an (`break-lock`, Task-Katalog).
+Eigene asynchrone Daemon-Arbeit (DB-Transaktionen, Stream-Parsing) bricht an
+definierten Abbruchpunkten kooperativ ab; SQLite-Transaktionen rollen
+zurück. Der Hammer ist demnach die Ausnahme, nicht das Mittel der Wahl.
 
 ## 2. Systemkomponenten
 
