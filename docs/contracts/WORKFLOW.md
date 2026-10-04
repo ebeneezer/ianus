@@ -12,25 +12,18 @@ Wald wie ein Dateisystem – sieht aber stets den **aktuellsten Stand** jeder Da
 
 ## 2. Hauptbereiche der Oberfläche
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  Toolbar (Suche, Benutzer, Einstellungen)               │
-├────────────────┬──────────────────────┬─────────────────┤
-│                │                      │                 │
-│  Waldbaum      │  Inhaltsbereich      │  Job-Dock       │
-│  (linke        │  (Dateien des        │  (rechte Seite  │
-│   Sidebar)     │   gewählten          │   oder unteres  │
-│                │   Verzeichnisses)    │   Panel)        │
-│  - Host A      │                      │                 │
-│    └ /etc      │  [Datei] [Datei]     │  ┌───────────┐ │
-│    └ /home     │  [Datei] [Datei]     │  │ Restore-  │ │
-│  - Host B      │                      │  │ Job #1    │ │
-│    └ /var      │                      │  │ 3 Objekte │ │
-│                │                      │  └───────────┘ │
-│                │                      │                 │
-├────────────────┴──────────────────────┴─────────────────┤
-│  Statusleiste (laufende Tasks, Indexierungsstatus)       │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    Toolbar["Toolbar (Suche, Benutzer, Einstellungen)"]
+    subgraph Hauptbereich[" "]
+        direction LR
+        Waldbaum["Waldbaum (linke Sidebar)\n- Host A\n &nbsp;&nbsp;└ /etc\n &nbsp;&nbsp;└ /home\n- Host B\n &nbsp;&nbsp;└ /var"]
+        Inhalt["Inhaltsbereich\n(Dateien des gewählten Verzeichnisses)\n[Datei] [Datei]\n[Datei] [Datei]"]
+        JobDock["Job-Dock (rechte Seite oder unteres Panel)\nRestore-Job #1\n3 Objekte"]
+    end
+    Status["Statusleiste (laufende Tasks, Indexierungsstatus)"]
+
+    Toolbar --> Hauptbereich --> Status
 ```
 
 ## 3. Interaktionen

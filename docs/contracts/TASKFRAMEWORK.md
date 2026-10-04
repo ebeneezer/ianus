@@ -11,26 +11,21 @@ dass neue Tasks ohne Änderung am Kernsystem hinzugefügt werden können.
 
 ## 2. Task-Lebenszyklus
 
-```
-    ┌──────────┐
-    │ Entwurf  │  ← Benutzer zieht Objekte auf Job
-    └────┬─────┘
-         │ Benutzer zieht Job in Ausführungszone
-    ┌────▼─────┐
-    │ Validiert│  ← validate() prüft Eingaben
-    └────┬─────┘
-         │ OK
-    ┌────▼─────┐
-    │ Warteschl│  ← Job-Queue (FIFO, optional Priorität)
-    └────┬─────┘
-         │ Runner nimmt auf
-    ┌────▼─────┐
-    │ Läuft    │  ← execute() + progress-Callback
-    └────┬─────┘
-         │
-    ┌────▼─────┐      ┌───────────┐
-    │ Fertig   │  oder│ Fehlgeschl│
-    └──────────┘      └───────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> Entwurf: Benutzer zieht Objekte auf Job
+    Entwurf --> Validiert: Benutzer zieht Job in Ausführungszone\n(validate() prüft Eingaben)
+    Validiert --> Warteschlange: OK (Job-Queue, FIFO/Priorität)
+    Warteschlange --> Laeuft: Runner nimmt auf\n(execute() + progress-Callback)
+    Laeuft --> Fertig
+    Laeuft --> Fehlgeschlagen
+    Entwurf --> Abgebrochen: cancel()
+    Validiert --> Abgebrochen: cancel()
+    Warteschlange --> Abgebrochen: cancel()
+    Laeuft --> Abgebrochen: cancel()
+    Fertig --> [*]
+    Fehlgeschlagen --> [*]
+    Abgebrochen --> [*]
 ```
 
 Zusätzlich: `cancel()` kann aus jedem aktiven Zustand aufgerufen werden.

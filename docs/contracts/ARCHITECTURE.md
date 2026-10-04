@@ -11,28 +11,25 @@ CleanMyMac: aufgeräumt, visuell klar, interaktionsgetrieben.
 
 ## 2. Systemkomponenten
 
-```
-┌─────────────────────────────────────────────────┐
-│  Browser (SPA)                                  │
-│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐│
-│  │ Waldbaum  │ │ Job-Dock │ │ Konfig-Explorer  ││
-│  │ (Explorer)│ │ (D&D)    │ │ (RBAC, Repos)    ││
-│  └──────────┘ └──────────┘ └──────────────────┘│
-└───────────────────┬─────────────────────────────┘
-                    │ REST + WebSocket
-┌───────────────────┴─────────────────────────────┐
-│  ianus-daemon (C)                               │
-│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐│
-│  │ HTTP/WS  │ │ Indexer   │ │ Task-Runner      ││
-│  │ Server   │ │ (Cache)   │ │ (Borg-Subproz.)  ││
-│  └──────────┘ └──────────┘ └──────────────────┘│
-│  ┌──────────────────────────────────────────────┐│
-│  │ DB-Abstraktionsschicht (sqlite / pgsql)      ││
-│  └──────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────┘
-        │                         │
-   Borg CLI (JSON)          Datenbank
-   (lokal/ssh/borg-serve)   (SQLite/PostgreSQL)
+```mermaid
+flowchart TB
+    subgraph Browser["Browser (SPA)"]
+        Waldbaum["Waldbaum (Explorer)"]
+        JobDock["Job-Dock (D&D)"]
+        Konfig["Konfig-Explorer (RBAC, Repos)"]
+    end
+
+    Browser -- "REST + WebSocket" --> Daemon
+
+    subgraph Daemon["ianus-daemon (C)"]
+        HTTP["HTTP/WS Server"]
+        Indexer["Indexer (Cache)"]
+        Runner["Task-Runner (Borg-Subprozess)"]
+        DBAbstr["DB-Abstraktionsschicht (sqlite / pgsql)"]
+    end
+
+    Daemon --> BorgCLI["Borg CLI (JSON)\n(lokal/ssh/borg-serve)"]
+    Daemon --> DB["Datenbank\n(SQLite/PostgreSQL)"]
 ```
 
 ## 3. Backend: ianus-daemon
