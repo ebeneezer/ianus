@@ -74,7 +74,8 @@ Status: FREIGEGEBEN
 
 ## 2. Frontend
 
-- Festlegung in separatem FRONTEND.md (Framework-Wahl noch offen).
+- Svelte 5 + Vite + TypeScript (verbindlich, siehe ARCHITECTURE §7); ESLint
+  und Prettier-Konfiguration werden mit der Frontend-Tranche eingebracht.
 - ESLint + Prettier als Formatierer.
 - Komponenten-Namen: PascalCase.
 - Keine `any`-Types in TypeScript.
