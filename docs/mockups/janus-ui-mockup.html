@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Janus — Mockup 04 · Dialoge, Tasks, Strich-Bäume</title>
+<title>Janus — Mockup 05 · Resize &amp; Persistenz</title>
 <style>
 :root{color-scheme:light dark;
 --page:#edf0ef;--paper:#fff;--panel:#f7f9f8;--line:#e1e7e4;--ink:#202927;--muted:#6e7975;--soft:#909a96;
@@ -31,9 +31,16 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 .mark{width:23px;height:23px;border-radius:7px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:13px}
 .tool-right{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
 .statusdot{width:7px;height:7px;border-radius:50%;background:#45a884;display:inline-block;margin-right:5px}
-.workbench{min-height:600px;display:grid;grid-template-columns:minmax(200px,.8fr) minmax(320px,1.3fr) minmax(320px,1.1fr);gap:1px;background:var(--line);position:relative;transition:grid-template-columns .24s ease}
-.workbench.has-host{grid-template-columns:72px minmax(340px,1.35fr) minmax(360px,1.3fr)}
+.workbench{min-height:600px;display:flex;background:var(--line);position:relative;align-items:stretch}
+.workbench>[data-zone=left]{flex:0 0 auto;width:var(--w-left,240px)}
+.workbench>[data-zone=middle]{flex:0 0 auto;width:var(--w-mid,430px)}
+.workbench>[data-zone=right]{flex:1 1 auto;min-width:300px}
+.workbench.has-host>[data-zone=left]{width:72px}
 .zone{background:var(--page);padding:12px;min-width:0;transition:background .16s}
+.split{flex:0 0 6px;background:var(--line);cursor:col-resize;position:relative;z-index:3}
+.split::after{content:"";position:absolute;left:2px;top:50%;height:34px;width:2px;margin-top:-17px;border-radius:2px;background:var(--soft);opacity:0;transition:opacity .16s}
+.split:hover::after,.split.active::after{opacity:.9}
+.split.active{background:var(--accent-line)}
 .zone.drop-target{background:var(--accent-pale)}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:11px;overflow:hidden;min-height:190px;box-shadow:var(--card)}
 .panel-head{height:40px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 11px;flex:none}
@@ -156,7 +163,9 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 .guide p{margin:0}
 .guide ol{padding-left:18px;margin:0}
 @media (max-width:1020px){
-.workbench,.workbench.has-host{grid-template-columns:1fr}
+.workbench{flex-direction:column}
+.workbench>[data-zone=left],.workbench>[data-zone=middle],.workbench.has-host>[data-zone=left]{width:auto;flex:1 1 auto}
+.split{display:none}
 .workbench.has-host [data-zone=left] .panel-name{font-size:12px}
 .workbench.has-host [data-zone=left] .panel-name:after{content:""}
 .workbench.has-host [data-zone=left] .object-copy{display:block}
@@ -168,16 +177,16 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 <main class="page">
 <header class="intro">
 <div>
-<div class="eyebrow">Janus · UX-Mockup 04</div>
+<div class="eyebrow">Janus · UX-Mockup 05</div>
 <h1>Objekte, Dialoge, Tasks</h1>
 <p>Dialoge sind Objekte im Frame. Tasks leben unten als eigene Objekte. Bäume klassisch mit Strichen.</p>
 </div>
-<div class="tip">Vorbefüllt: atlas ist geöffnet, drei Detail-Objekte, drei Task-Objekte. Rechtsklick im Baum für versierte Nutzer.</div>
+<div class="tip">Vorbefüllt: atlas geöffnet, drei Detail-Objekte, drei Task-Objekte. Spalten per Griff ziehen – alles übersteht das Neuladen.</div>
 </header>
 <section class="app" aria-label="Janus Mockup 04">
 <div class="toolbar">
 <div class="brand"><span class="mark">J</span>janus</div>
-<div class="tool-right"><span><span class="statusdot"></span>Bereit</span><span>·</span><span>Backup-Wald</span></div>
+<div class="tool-right"><span><span class="statusdot"></span>Bereit</span><span>·</span><span>Backup-Wald</span><button class="mini" id="resetLayout" title="Gespeicherten Zustand löschen und Mockup neu starten">Layout zurücksetzen</button></div>
 </div>
 <div class="workbench" id="workbench">
 <section class="zone" data-zone="left" id="archiveZone" aria-label="Archive">
@@ -186,12 +195,14 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 <div class="panel-body" id="archiveBody"></div>
 </article>
 </section>
+<div class="split" id="splitL" role="separator" aria-orientation="vertical" aria-label="Archive-Breite ändern" title="Ziehen: Breite ändern · Doppelklick: Spalten zurücksetzen"></div>
 <section class="zone" data-zone="middle" id="workspaceZone" aria-label="Workspace">
 <article class="panel" id="workspacePanel">
 <header class="panel-head"><span class="panel-name">Workspace</span></header>
 <div class="panel-body" id="workspaceBody"></div>
 </article>
 </section>
+<div class="split" id="splitM" role="separator" aria-orientation="vertical" aria-label="Workspace-Breite ändern" title="Ziehen: Breite ändern · Doppelklick: Spalten zurücksetzen"></div>
 <section class="zone" data-zone="right" id="detailsZone" aria-label="Details">
 <div class="detail-stack" id="detailStack"></div>
 </section>
@@ -203,6 +214,7 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 <div class="foot">
 <span>Dialog-Objekt minimiert seine Nachbarn in der Pane; Schließen stellt sie wieder her. Keine gestapelten Ebenen.</span>
 <span>Objekt schließen: das Eltern-Objekt blitzt kurz auf. Host-Schließen mit Kindern fragt als Dialog nach.</span>
+<span>Panes per Maus veränderbar; Layout und Zustand werden sofort gesichert – Neuladen übersteht sie (Mockup: Browser-Speicher; Produkt: cfg/ im Backend, überdauert Daemon-Restarts).</span>
 </div>
 </section>
 <section class="guide">
@@ -215,11 +227,12 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 <li><b>Repo-Objekt → Filter-Objekt</b> (Rechtsklick): Dialog-Objekt in der Details-Pane, Nachbarn minimiert. „Als Task committen“ erzeugt ein neues Task-Objekt.</li>
 <li>Host schließen (✕) bei offenen Details: <b>Bestätigungs-Dialog ersetzt das Objekt</b> – bestätigen räumt auf, abbrechen zeigt es wieder.</li>
 <li>Beim Schließen eines Objekts blitzt das <b>Eltern-Objekt</b> kurz auf – kein Breadcrumb-Band.</li>
+<li><b>Panes per Maus verändern</b> (Griff zwischen den Spalten, Doppelklick setzt zurück). Layout und geöffneter Zustand werden sofort gesichert und <b>überstehen Neuladen und Backend-Restart</b> – im Produkt persistiert der Daemon sie im cfg/-Keyspace.</li>
 </ol>
 </div>
 <div>
 <h2>Zu beurteilen</h2>
-<p>Trägt die Knopfleiste am Snapshot die Funktionen sichtbar genug? Ist der Dialog-als-Objekt-Mechanismus (Nachbarn minimiert, Pane wird wiederhergestellt) verständlich? Ersetzt der Eltern-Flash die Breadcrumbs? Wirken Task-Objekte mit Entwurf/laufend/fertig und ehrlichem Fortschritt glaubwürdig? Sind die klassischen Strich-Bäume lesbar?</p>
+<p>Trägt die Knopfleiste am Snapshot die Funktionen sichtbar genug? Ist der Dialog-als-Objekt-Mechanismus (Nachbarn minimiert, Pane wird wiederhergestellt) verständlich? Ersetzt der Eltern-Flash die Breadcrumbs? Wirken Task-Objekte mit Entwurf/laufend/fertig und ehrlichem Fortschritt glaubwürdig? Sind die klassischen Strich-Bäume lesbar? Reichen Griff-Ziehen und Doppelklick fürs Resize, und ist die sofortige Layout-Sicherung nachvollziehbar?</p>
 </div>
 </section>
 </main>
@@ -277,6 +290,24 @@ var RESTORE_PHASES=["Stelle Restore-Job zusammen …","Extrahiere Objekte …","
 
 var openHostId=null,details=[],tasks=[],dialogFilter=null,wsDialog=null,taskSeq=1;
 var ctxBox=$("#ctx"),toastBox=$("#toast"),toastTimer=null;
+var L={wl:240,wm:430},DEFAULTS={wl:240,wm:430};
+var store={
+	key:"janus-mockup-state",
+	read:function(){try{var s=localStorage.getItem(this.key);return s?JSON.parse(s):null}catch(e){return null}},
+	write:function(v){try{localStorage.setItem(this.key,JSON.stringify(v))}catch(e){}},
+	clear:function(){try{localStorage.removeItem(this.key)}catch(e){}}
+};
+var saveTimer=null;
+function save(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(function(){store.write(collect())},150)}
+function applyLayout(){
+	var wb=$("#workbench");
+	wb.style.setProperty("--w-left",L.wl+"px");
+	wb.style.setProperty("--w-mid",L.wm+"px");
+}
+function normalizeLayout(){
+	L.wl=Math.max(170,Math.min(L.wl,window.innerWidth-760));
+	L.wm=Math.max(330,Math.min(L.wm,window.innerWidth-72-330-360));
+}
 
 function toast(msg){toastBox.textContent=msg;toastBox.hidden=false;
  if(toastTimer)clearTimeout(toastTimer);
@@ -657,6 +688,7 @@ function renderTasks(){
   return;
  }
  tasks.forEach(function(t){row.appendChild(taskCard(t))});
+ save();
 }
 function taskCard(t){
  var c=el("article","task"+(t.state==="done"?" t-done":""));
@@ -724,27 +756,33 @@ function removeTask(t){
 function commitTask(t){
  if(t.state!=="draft")return;
  if(!t.filtered&&!t.items.length){toast("Entwurf ist leer – zuerst Blätter vormerken.");return}
- t.state="running";t.pct=4;t.tick=0;
+ t.state="running";t.pct=Math.max(4,t.pct||4);t.tick=0;
  t.phase=t.filtered?("Extrahiere "+t.hits+" gefilterte Objekte …"):RESTORE_PHASES[0];
  t.eta="Rest geschätzt …";
+ runStepper(t);
+ renderTasks();
+ toast("Task committet – das auslösende Panel bleibt geöffnet.");
+}
+function runStepper(t){
  t.timers=[];
  var step=function(){
   t.tick++;
   t.pct=Math.min(100,t.pct+7+Math.floor(Math.random()*6));
-  if(!t.filtered)t.phase=RESTORE_PHASES[Math.min(RESTORE_PHASES.length-1,Math.floor(t.pct/26))];
+  if(t.type==="check")t.phase="Segment "+Math.max(1,Math.round(t.pct/100*29))+" von 29 prüfen …";
+  else if(!t.filtered)t.phase=RESTORE_PHASES[Math.min(RESTORE_PHASES.length-1,Math.floor(t.pct/26))];
   var rem=Math.max(0,Math.round((100-t.pct)*0.12));
-  t.eta=(rem>0?("Rest geschätzt ~0:"+String(rem).padStart(2,"0")+" min"):"gleich fertig");
+  t.eta=(t.pct>=100)?"gleich fertig":(rem>0?("Rest geschätzt ~0:"+String(rem).padStart(2,"0")+" min"):"gleich fertig");
   if(t.pct>=100){
    t.state="done";
-   t.summary=t.filtered?(t.hits+" Objekte nach /tmp/janus-restore wiederhergestellt"):(t.items.length+" Objekte nach /tmp/janus-restore wiederhergestellt");
-   toast("Restore abgeschlossen – Ergebnis im Task-Objekt.");
+   if(t.type==="check")t.summary="Check abgeschlossen – Repository konsistent, keine Fehler";
+   else if(t.filtered)t.summary=t.hits+" Objekte nach /tmp/janus-restore wiederhergestellt";
+   else t.summary=t.items.length+" Objekte nach /tmp/janus-restore wiederhergestellt";
+   toast("Task abgeschlossen – Ergebnis im Task-Objekt.");
   }
   renderTasks();
   if(t.state==="running")t.timers.push(setTimeout(step,650));
  };
  t.timers.push(setTimeout(step,500));
- renderTasks();
- toast("Task committet – das auslösende Panel bleibt geöffnet.");
 }
 function cancelTask(t){
  (t.timers||[]).forEach(function(x){clearTimeout(x)});
@@ -793,8 +831,9 @@ tp.addEventListener("drop",function(ev){
 });
 
 function renderAll(){
- renderArchive();renderWorkspace();renderDetails();renderTasks();
- $("#workbench").classList.toggle("has-host",!!openHostId);
+	renderArchive();renderWorkspace();renderDetails();renderTasks();
+	$("#workbench").classList.toggle("has-host",!!openHostId);
+	applyLayout();save();
 }
 function seed(){
  openHostId="atlas";
@@ -815,6 +854,75 @@ function seed(){
  renderAll();
 }
 seed();
+function collect(){
+	return {
+		v:1,
+		layout:{wl:L.wl,wm:L.wm},
+		host:openHostId,
+		taskSeq:taskSeq,
+		details:details.map(function(d){
+			return {kind:d.kind,key:d.key,title:d.title,short:d.short,
+				filterOn:d.filter.on,filterQ:d.filter.q,
+				marks:Array.from(d.marks),selected:d.selected,
+				expanded:Array.from(d.expanded),extra:d.extra||{}};
+		}),
+		tasks:tasks.map(function(t){
+			var x={id:t.id,type:t.type,state:t.state,filtered:!!t.filtered,
+				pattern:t.pattern,minSize:t.minSize,hits:t.hits,pct:t.pct,
+				phase:t.phase,eta:t.eta,summary:t.summary,when:t.when,note:t.note};
+			if(t.items)x.items=t.items;
+			return x;
+		})
+	};
+}
+function restore(s){
+	try{
+		if(s.layout){L.wl=+s.layout.wl||DEFAULTS.wl;L.wm=+s.layout.wm||DEFAULTS.wm}
+		normalizeLayout();
+		openHostId=s.host||null;
+		taskSeq=s.taskSeq||1;
+		details=(s.details||[]).map(function(d){
+			return {kind:d.kind,key:d.key,title:d.title,short:d.short,loading:false,
+				filter:{on:!!d.filterOn,q:d.filterQ||""},marks:new Set(d.marks||[]),
+				selected:d.selected||null,rows:[],
+				expanded:new Set(d.expanded||["/etc","/home","/home/dr.raus","/var","/var/log"]),
+				extra:d.extra||{}};
+		});
+		tasks=(s.tasks||[]).map(function(t){
+			t.timers=[];
+			if(t.state==="draft"&&!t.filtered)t.items=t.items||[];
+			return t;
+		});
+		tasks.forEach(function(t){if(t.state==="running")runStepper(t)});
+		return true;
+	}catch(e){return false}
+}
+function initSplit(id,get,set,min){
+	var s=$("#"+id),startX=0,startV=0;
+	s.addEventListener("pointerdown",function(e){
+		if(e.button!==0)return;
+		e.preventDefault();
+		startX=e.clientX;startV=get();
+		s.setPointerCapture(e.pointerId);
+		s.classList.add("active");
+	});
+	s.addEventListener("pointermove",function(e){
+		if(!s.classList.contains("active"))return;
+		set(Math.max(min,Math.min(startV+e.clientX-startX,window.innerWidth-420)));
+		applyLayout();
+	});
+	var up=function(){if(!s.classList.contains("active"))return;s.classList.remove("active");save()};
+	s.addEventListener("pointerup",up);
+	s.addEventListener("pointercancel",up);
+	s.addEventListener("dblclick",function(){L.wl=DEFAULTS.wl;L.wm=DEFAULTS.wm;applyLayout();save()});
+}
+initSplit("splitL",function(){return L.wl},function(v){L.wl=v},170);
+initSplit("splitM",function(){return L.wm},function(v){L.wm=v},330);
+$("#resetLayout").addEventListener("click",function(){store.clear();location.reload()});
+window.addEventListener("resize",function(){normalizeLayout();applyLayout()});
+var saved=store.read();
+if(saved&&restore(saved))renderAll();
+else seed();
 })();
 </script>
 </body>
