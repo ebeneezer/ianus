@@ -121,15 +121,27 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
 
 ## 7. Frontend (SPA)
 
-- Svelte (oder React – Entscheidung in FRONTEND.md).
-- Drag & Drop: dnd-kit oder Svelte-natives D&D.
+- **Stack (verbindlich)**: Svelte 5 + Vite + TypeScript. Entscheidung des
+  Auftraggebers gegen React/Vue/Vanilla begründet: komponentenfeingranulare
+  Reaktivität ohne VDOM (Live-Task-Ticker, große lazy Trees), eingebaute
+  Transition-Engine für die CleanMyMac-Anmutung (`prefers-reduced-motion`
+  ist Idiom, nicht Nachbau), kleine Runtime, minimaler Dependency-Churn.
+- Kein UI-Kit (MUI/Chakra/Bootstrap): das individuelle Objekt-Design wird
+  als eigene Primitives gebaut – CSS-Custom-Properties mit der verbindlichen
+  Palette aus WORKFLOW §6.
+- Drag & Drop: native HTML5-DnD-API mit eigenen MIME-Typen
+  (`application/janus-host`, `application/janus-object`,
+  `application/janus-task`) für den Objektfluss zwischen Panes;
+  `svelte-dnd-action` (MIT) nur falls Listen-Sortierung gebraucht wird.
 - Virtualisierter Baumexplorer (Lazy-Load bei > 1000 Einträgen pro Verzeichnis).
-- Design-Sprache: CleanMyMac-inspiriert – helles, aufgeräumtes UI, Karten-Metapher
-  für Jobs, sanfte Animationen.
+- Design-Sprache: CleanMyMac-inspiriert – helles, aufgeräumtes UI, Objekt-Metapher
+  (abgerundete Rechtecke), sanfte Animationen max. 300 ms.
 - WebSocket für Echtzeit-Fortschritt laufender Tasks.
 - UI-Sprache und Farbtheme sind einstellbar: Themes als CSS-Custom-Properties
   (Laufzeitumschaltung ohne Neustart), Übersetzungen als statische Bundles;
   im Konfig-Speicher liegen nur die gewählten Werte.
+- Frontend-Build (`vite build`) erzeugt statische Assets, die janusd direkt
+  ausliefert – kein separater Node-Server im Betrieb.
 
 ## 8. systemd-Integration
 
