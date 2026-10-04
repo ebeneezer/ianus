@@ -34,7 +34,7 @@ flowchart TB
 
     Browser -- "REST + WebSocket" --> Daemon
 
-    subgraph Daemon["janus-daemon (C)"]
+    subgraph Daemon["janusd (C)"]
         HTTP["HTTP/WS Server"]
         Indexer["Indexer (Cache)"]
         Runner["Task-Runner (Borg-Subprozess)"]
@@ -47,7 +47,7 @@ flowchart TB
     DBAdapter --> DB["Datenbank\n(SQLite/PostgreSQL)"]
 ```
 
-## 3. Backend: janus-daemon
+## 3. Backend: janusd
 
 - **Sprache**: ausschließlich C (C99, POSIX).
 - **HTTP/WebSocket-Server**: civetweb (eingebettet, lizenzkompatibel MIT).
@@ -133,7 +133,7 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
 
 ## 8. systemd-Integration
 
-- `janus.service`: startet `janus-daemon`, Type=notify, Restart=on-failure.
+- `janus.service`: startet `janusd`, Type=notify, Restart=on-failure.
 - Optional: `janus-indexer.timer` für periodische Repo-Indexierung.
 - Socket-Activation möglich (Phase 2).
 
