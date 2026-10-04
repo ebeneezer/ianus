@@ -1,7 +1,7 @@
 # Janus – Architekturvertrag
 
 Version: 0.4.0
-Status: ENTWURF – erneute Freigabe erforderlich (Borg-2-Festlegung, C-Reste, Restore-Sicherheit)
+Status: FREIGEGEBEN
 
 ## 1. Überblick
 
