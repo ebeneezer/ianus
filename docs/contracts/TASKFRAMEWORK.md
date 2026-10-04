@@ -1,4 +1,4 @@
-# Ianus – Task-Framework-Vertrag
+# Janus – Task-Framework-Vertrag
 
 Version: 0.1.1
 Status: FREIGEGEBEN
@@ -55,9 +55,9 @@ beendet ist.
 ## 3. Task-Registry
 
 ```c
-int ianus_task_register(const ianus_task_t *task);
-const ianus_task_t *ianus_task_find(const char *name);
-void ianus_task_foreach(void (*cb)(const ianus_task_t *task, void *userdata), void *userdata);
+int janus_task_register(const janus_task_t *task);
+const janus_task_t *janus_task_find(const char *name);
+void janus_task_foreach(void (*cb)(const janus_task_t *task, void *userdata), void *userdata);
 ```
 
 Die Registry wird beim Daemon-Start befüllt. Phase 1 registriert die Tasks
@@ -119,9 +119,9 @@ typedef struct {
     uint64_t files_total;
     const char *current_file;  // Aktuell verarbeitete Datei
     const char *message;       // Statusmeldung
-} ianus_progress_t;
+} janus_progress_t;
 
-typedef void (*ianus_progress_cb)(const ianus_progress_t *progress, void *userdata);
+typedef void (*janus_progress_cb)(const janus_progress_t *progress, void *userdata);
 ```
 
 Der Daemon sendet Fortschritt über WebSocket an verbundene Clients.

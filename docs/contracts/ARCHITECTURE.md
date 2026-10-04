@@ -1,17 +1,17 @@
-# Ianus – Architekturvertrag
+# Janus – Architekturvertrag
 
 Version: 0.1.2
 Status: FREIGEGEBEN
 
 ## 1. Überblick
 
-Ianus ist ein Web-UI für Borg Backup, das einen intuitiven, Drag-&-Drop-basierten
+Janus ist ein Web-UI für Borg Backup, das einen intuitiven, Drag-&-Drop-basierten
 Workflow auf Linux-systemd-Systemen bereitstellt. Das Design orientiert sich an
 CleanMyMac: aufgeräumt, visuell klar, interaktionsgetrieben.
 
-Produktziel: Ianus macht Borg angenehm, verständlich und vertrauenswürdig – für
+Produktziel: Janus macht Borg angenehm, verständlich und vertrauenswürdig – für
 das Anlegen von Backups, die Erkundung von Archiven und die Wiederherstellung.
-Borg ist häufig schweigsam und Remote-Speicher kann langsam sein; Ianus macht
+Borg ist häufig schweigsam und Remote-Speicher kann langsam sein; Janus macht
 diese Arbeit transparent und nachvollziehbar: laufendes, verständliches Feedback
 zu Fortschritt, voraussichtlicher Dauer/Restzeit und sauberem Cancel. Dabei wird
 keine erfundene Gewissheit oder erfundener Fortschritt suggeriert.
@@ -34,7 +34,7 @@ flowchart TB
 
     Browser -- "REST + WebSocket" --> Daemon
 
-    subgraph Daemon["ianus-daemon (C)"]
+    subgraph Daemon["janus-daemon (C)"]
         HTTP["HTTP/WS Server"]
         Indexer["Indexer (Cache)"]
         Runner["Task-Runner (Borg-Subprozess)"]
@@ -47,7 +47,7 @@ flowchart TB
     DBAdapter --> DB["Datenbank\n(SQLite/PostgreSQL)"]
 ```
 
-## 3. Backend: ianus-daemon
+## 3. Backend: janus-daemon
 
 - **Sprache**: ausschließlich C (C99, POSIX).
 - **HTTP/WebSocket-Server**: civetweb (eingebettet, lizenzkompatibel MIT).
@@ -124,8 +124,8 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
 
 ## 8. systemd-Integration
 
-- `ianus.service`: startet `ianus-daemon`, Type=notify, Restart=on-failure.
-- Optional: `ianus-indexer.timer` für periodische Repo-Indexierung.
+- `janus.service`: startet `janus-daemon`, Type=notify, Restart=on-failure.
+- Optional: `janus-indexer.timer` für periodische Repo-Indexierung.
 - Socket-Activation möglich (Phase 2).
 
 ## 9. Erweiterbarkeit: Task-Framework
@@ -133,15 +133,15 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
 Jeder Task ist ein eigenständiger Handler mit definiertem Interface:
 
 ```c
-typedef struct ianus_task {
+typedef struct janus_task {
     const char *name;
     const char *description;
-    ianus_task_input_type_t input_type;  // PATHS, REPO, ARCHIVE, ...
-    ianus_role_t required_role;
-    int (*validate)(const ianus_task_ctx_t *ctx);
-    int (*execute)(const ianus_task_ctx_t *ctx, ianus_progress_cb progress);
-    int (*cancel)(const ianus_task_ctx_t *ctx);
-} ianus_task_t;
+    janus_task_input_type_t input_type;  // PATHS, REPO, ARCHIVE, ...
+    janus_role_t required_role;
+    int (*validate)(const janus_task_ctx_t *ctx);
+    int (*execute)(const janus_task_ctx_t *ctx, janus_progress_cb progress);
+    int (*cancel)(const janus_task_ctx_t *ctx);
+} janus_task_t;
 ```
 
 Phase 1: `restore`, `check`.

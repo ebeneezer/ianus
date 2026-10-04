@@ -1,4 +1,4 @@
-# Ianus – Agent Instructions
+# Janus – Agent Instructions
 
 ## Before any implementation work
 
@@ -15,8 +15,8 @@
 - Handwritten source files have a hard limit of 1000 characters, including whitespace and comments; refactor and split semantically into appropriately named files before exceeding it. Generated and vendored files are exempt.
 - Prefer table-driven dispatch over long `if`/`else if` chains where it clarifies control flow.
 - Prioritize efficiency, code reuse, and minimal RSS; avoid unnecessary abstractions.
-- No Ianus identifier may start with an underscore; do not define or use reserved C identifiers.
-- Naming: `ianus_<module>_<verb>()` for functions, `ianus_<name>_t` for types.
+- No Janus identifier may start with an underscore; do not define or use reserved C identifiers.
+- Naming: `janus_<module>_<verb>()` for functions, `janus_<name>_t` for types.
 - Build system: CMake >= 3.20.
 - All public functions require Doxygen comments.
 - Every file needs an SPDX license header.
@@ -25,7 +25,7 @@
 
 - See `docs/contracts/ARCHITECTURE.md` for the component overview.
 - DB abstraction via `db_driver_t` function-pointer struct.
-- Task framework via `ianus_task_t` registration interface.
+- Task framework via `janus_task_t` registration interface.
 - Borg interaction exclusively via subprocess + JSON parsing.
 
 ## Working language and communication

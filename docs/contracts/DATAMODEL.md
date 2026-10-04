@@ -1,4 +1,4 @@
-# Ianus – Datenmodell-Vertrag
+# Janus – Datenmodell-Vertrag
 
 Version: 0.1.2
 Status: FREIGEGEBEN

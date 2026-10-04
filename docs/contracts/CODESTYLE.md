@@ -1,4 +1,4 @@
-# Ianus – Code-Style-Vertrag
+# Janus – Code-Style-Vertrag
 
 Version: 0.1.5
 Status: FREIGEGEBEN
@@ -35,10 +35,10 @@ Status: FREIGEGEBEN
 ### 1.3 Namenskonventionen
 
 - Bezeichner beginnen niemals mit einem Unterstrich; reservierte C-Bezeichner bleiben unangetastet.
-- Funktionen: `ianus_<modul>_<verb>()` → `ianus_db_open()`, `ianus_repo_index()`.
-- Typen: `ianus_<name>_t` → `ianus_repo_t`, `ianus_job_state_t`.
-- Enums: `IANUS_<MODUL>_<WERT>` → `IANUS_JOB_RUNNING`.
-- Makros: `IANUS_<KONTEXT>_<NAME>` → `IANUS_DB_MAX_RETRIES`.
+- Funktionen: `janus_<modul>_<verb>()` → `janus_db_open()`, `janus_repo_index()`.
+- Typen: `janus_<name>_t` → `janus_repo_t`, `janus_job_state_t`.
+- Enums: `JANUS_<MODUL>_<WERT>` → `JANUS_JOB_RUNNING`.
+- Makros: `JANUS_<KONTEXT>_<NAME>` → `JANUS_DB_MAX_RETRIES`.
 - Lokale Variablen: snake_case, keine Präfixe.
 - Struct-Felder: snake_case.
 
@@ -57,15 +57,15 @@ Status: FREIGEGEBEN
 ### 1.5 Speicherverwaltung
 
 - Jede Allokation hat genau einen dokumentierten Eigentümer.
-- `ianus_<modul>_create()` erzeugt, `ianus_<modul>_destroy()` gibt frei – symmetrisch.
+- `janus_<modul>_create()` erzeugt, `janus_<modul>_destroy()` gibt frei – symmetrisch.
 - Rückgabewert bei Fehlern: `NULL` oder negativer int, kein `errno`-Overloading.
 - Keine globalen Variablen außer read-only Konfiguration.
 
 ### 1.6 Fehlerbehandlung
 
 - Funktionen geben `int` (0 = Erfolg, < 0 = Fehler) oder `NULL`-Pointer zurück.
-- Fehlercodes als `IANUS_ERR_*`-Enums.
-- Logging über `ianus_log(level, fmt, ...)` mit sd-journal-Anbindung.
+- Fehlercodes als `JANUS_ERR_*`-Enums.
+- Logging über `janus_log(level, fmt, ...)` mit sd-journal-Anbindung.
 
 ### 1.7 Dokumentation
 

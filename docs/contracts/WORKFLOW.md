@@ -1,11 +1,11 @@
-# Ianus – UX-Workflow-Vertrag
+# Janus – UX-Workflow-Vertrag
 
 Version: 0.1.3
 Status: FREIGEGEBEN
 
 ## 1. Zentrale Metapher
 
-Ianus präsentiert dem Benutzer einen **Wald**: eine Menge von Bäumen, deren
+Janus präsentiert dem Benutzer einen **Wald**: eine Menge von Bäumen, deren
 Wurzeln die gesicherten Hosts/Repositories sind. Der Benutzer navigiert diesen
 Wald wie ein Dateisystem – sieht aber stets den **aktuellsten Stand** jeder Datei
 über alle Archive hinweg, ohne Archive manuell auswählen zu müssen.
@@ -82,7 +82,7 @@ Auf jedes Objekt (Datei oder Verzeichnis):
 
 - Jede potenziell lange Aktion – Host/Repo öffnen, Index-/Baumladen,
   Remote-DB-Abfrage, Backup erstellen, Restore, Check, Prune – zeigt stets die
-  aktuelle Phase, was Ianus gerade tut, aussagekräftige Zähler (erledigt/gesamt)
+  aktuelle Phase, was Janus gerade tut, aussagekräftige Zähler (erledigt/gesamt)
   und die verstrichene Zeit.
 - Restzeit/ETA nur, wenn sie aus gemessener Arbeit glaubwürdig ableitbar ist;
   sonst unbestimmter Fortschritt und ehrlicher Status. Prozentwerte und ETAs
