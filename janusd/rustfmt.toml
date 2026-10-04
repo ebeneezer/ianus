@@ -1,0 +1,5 @@
+# Janus rustfmt: tabs (width 3) per CODESTYLE §1.4; compact lines keep
+# handwritten files within the 1000-character budget.
+hard_tabs = true
+tab_spaces = 3
+max_width = 120
