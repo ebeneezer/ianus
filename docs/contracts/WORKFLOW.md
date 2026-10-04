@@ -138,7 +138,35 @@ Erreichbar über Einstellungen-Icon in der Toolbar:
 - Konsistente Abstände, klare Hierarchie, leichte Oberflächen/Karten.
 - Zurückhaltende Akzentfarbe und verständliche Icons.
 - Farbschema: Neutrales Grau + ein Akzentton (vorläufig Blau/Teal, anpassbar).
+- **Verbindliche Palette** („Janus Teal", aus Mockup 05; siehe auch
+  `docs/mockups/janus-ui-mockup.html`):
+
+  | Rolle | Hell | Dunkel |
+  |---|---|---|
+  | Seitenhintergrund `--page` | `#edf0ef` | `#151918` |
+  | Flächen/Panels `--paper` | `#ffffff` | `#1d2321` |
+  | Panelinnenfläche `--panel` | `#f7f9f8` | `#232a28` |
+  | Trennlinien `--line` | `#e1e7e4` | `#2f3734` |
+  | Text `--ink` | `#202927` | `#e3eae7` |
+  | Sekundärtext `--muted` | `#6e7975` | `#9aa8a3` |
+  | Tertiärtext `--soft` | `#909a96` | `#76827e` |
+  | **Akzent** `--accent` | `#168b78` | `#3fb394` |
+  | Akzentfläche `--accent-pale` | `#e7f4f0` | `#20312c` |
+  | Akzentkontur `--accent-line` | `#9acbbd` | `#33544b` |
+  | Gefahr/Abbruch `--danger` | `#b3564d` | `#d98177` |
+  | Baumkonnektoren `--treeline` | `#c3ccc8` | `#3a4441` |
+
+  Diese Werte sind die Referenz; Frontend und Mockups nutzen sie unverändert
+  als CSS Custom Properties. Andere Themes dürfen als Alternative definiert
+  werden, „Janus Teal" bleibt Standard.
 - Icons: Lucide oder Phosphor (MIT-lizenziert).
+- **App-Icon**: `assets/janus app icon.png` (verkleinerte Referenz:
+  `docs/assets/janus-app-icon-256.png`) ist das verbindliche App-Icon und wird
+  ab sofort in allen Janus-Oberflächen (Favicon, Toolbar-Marke, About/Info)
+  verwendet.
+- **Repo-Logo**: `assets/janus repo logo.png` (Referenz:
+  `docs/assets/janus-repo-logo-400.png`) ist das verbindliche Logo für
+  README und Dokumentation.
 - Typografie: System-Font-Stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", ...`).
 - Der Benutzer muss keine UX-/Designvorgaben liefern.
 

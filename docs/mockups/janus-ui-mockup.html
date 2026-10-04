@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../assets/janus app icon.png">
 <title>Janus — Mockup 05 · Resize &amp; Persistenz</title>
 <style>
 :root{color-scheme:light dark;
@@ -28,6 +29,7 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 .app{border:1px solid var(--line);border-radius:15px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
 .toolbar{height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
 .brand{font-weight:730;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.brandmark{width:26px;height:26px;border-radius:7px;flex:none;display:block}
 .mark{width:23px;height:23px;border-radius:7px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:13px}
 .tool-right{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
 .statusdot{width:7px;height:7px;border-radius:50%;background:#45a884;display:inline-block;margin-right:5px}
@@ -185,7 +187,7 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 </header>
 <section class="app" aria-label="Janus Mockup 04">
 <div class="toolbar">
-<div class="brand"><span class="mark">J</span>janus</div>
+<div class="brand"><img class="brandmark" src="../assets/janus app icon.png" alt="Janus"><span>janus</span></div>
 <div class="tool-right"><span><span class="statusdot"></span>Bereit</span><span>·</span><span>Backup-Wald</span><button class="mini" id="resetLayout" title="Gespeicherten Zustand löschen und Mockup neu starten">Layout zurücksetzen</button></div>
 </div>
 <div class="workbench" id="workbench">

@@ -1,5 +1,7 @@
 # Janus
 
+<p align="center"><img src="docs/assets/janus-repo-logo-400.png" width="200" alt="Janus logo — two faces looking back and forth, symbolizing backup and restore"></p>
+
 A modern, drag-and-drop Web UI for [Borg Backup](https://www.borgbackup.org/),
 inspired by CleanMyMac's design language. Built for Linux systemd systems.
 
