@@ -1,34 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-//! REST handlers for health and cfg endpoints.
+//! REST handlers for the health and cfg endpoints.
 
 use axum::Json;
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
-use serde::Deserialize;
+use serde_json::Value as JsonValue;
 
 use crate::janus_cfg::CfgEntry;
-use crate::janus_http::{ApiError, AppState};
-
-/// Query parameters of the cfg list endpoint.
-#[derive(Deserialize)]
-pub struct ListQuery {
-	/// Exclusive cursor: list entries after this name.
-	pub after: Option<String>,
-	/// Maximum number of entries (default 100, max 1000).
-	pub limit: Option<u32>,
-}
+use crate::janus_http::{ApiError, AppState, ListQuery};
 
 /// Returns `{"status":"ok"}`.
-pub async fn health() -> Json<serde_json::Value> {
+pub async fn health() -> Json<JsonValue> {
 	Json(serde_json::json!({ "status": "ok" }))
 }
 
 /// Returns the value of `cfg/<key>`, or 404 if absent.
-pub async fn get_cfg(
-	State(state): State<AppState>,
-	Path(name): Path<String>,
-) -> Result<Json<serde_json::Value>, ApiError> {
+pub async fn get_cfg(State(state): State<AppState>, Path(name): Path<String>) -> Result<Json<JsonValue>, ApiError> {
 	match state.cfg.get(&name).await? {
 		Some(value) => Ok(Json(value)),
 		None => Err(ApiError::not_found(format!("cfg key not found: {name}"))),
@@ -39,7 +27,7 @@ pub async fn get_cfg(
 pub async fn put_cfg(
 	State(state): State<AppState>,
 	Path(name): Path<String>,
-	payload: Result<Json<serde_json::Value>, axum::extract::rejection::JsonRejection>,
+	payload: Result<Json<JsonValue>, axum::extract::rejection::JsonRejection>,
 ) -> Result<StatusCode, ApiError> {
 	let value = payload.map_err(|_| ApiError::bad_request("invalid JSON body"))?;
 	state.cfg.put(&name, &value.0).await?;

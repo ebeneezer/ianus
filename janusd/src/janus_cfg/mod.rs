@@ -9,6 +9,7 @@ pub mod validate;
 
 use std::sync::Arc;
 
+use crate::janus_ident;
 use crate::janus_kv::KvStore;
 
 pub use error::Error;
@@ -29,8 +30,5 @@ impl CfgStore {
 
 /// Validates a cfg name: non-empty, no `/`, at most 128 chars.
 pub fn validate_name(name: &str) -> Result<(), Error> {
-	if name.is_empty() || name.contains('/') || name.len() > 128 {
-		return Err(Error::InvalidName(name.to_string()));
-	}
-	Ok(())
+	janus_ident::validate_name(name).map_err(Error::InvalidName)
 }

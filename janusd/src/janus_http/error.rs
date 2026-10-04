@@ -7,6 +7,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 
 use crate::janus_cfg;
+use crate::janus_repo;
 
 /// An HTTP error response with a JSON body `{"error": message}`.
 pub struct ApiError {
@@ -50,6 +51,18 @@ impl From<janus_cfg::Error> for ApiError {
 	fn from(err: janus_cfg::Error) -> Self {
 		match err {
 			janus_cfg::Error::InvalidName(_) | janus_cfg::Error::InvalidValue(_) => ApiError {
+				status: StatusCode::UNPROCESSABLE_ENTITY,
+				message: err.to_string(),
+			},
+			_ => ApiError::internal("internal store error"),
+		}
+	}
+}
+
+impl From<janus_repo::Error> for ApiError {
+	fn from(err: janus_repo::Error) -> Self {
+		match err {
+			janus_repo::Error::InvalidName(_) | janus_repo::Error::InvalidValue(_) => ApiError {
 				status: StatusCode::UNPROCESSABLE_ENTITY,
 				message: err.to_string(),
 			},

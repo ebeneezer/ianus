@@ -11,6 +11,7 @@ use std::sync::Arc;
 use janusd::janus_cfg::CfgStore;
 use janusd::janus_http::{AppState, router};
 use janusd::janus_kv::SqliteStore;
+use janusd::janus_repo::RepoStore;
 use tokio::net::TcpListener;
 use tracing_subscriber::EnvFilter;
 
@@ -49,7 +50,8 @@ async fn run() -> Result<(), BoxError> {
 	}
 	let store = Arc::new(SqliteStore::open(config_path)?);
 	let state = AppState {
-		cfg: CfgStore::new(store),
+		cfg: CfgStore::new(store.clone()),
+		repo: RepoStore::new(store),
 	};
 	let listener = TcpListener::bind(&args.bind).await?;
 	tracing::info!("janusd listening on {} (config db: {})", args.bind, args.config_db);

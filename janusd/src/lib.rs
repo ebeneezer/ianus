@@ -10,4 +10,6 @@
 
 pub mod janus_cfg;
 pub mod janus_http;
+pub mod janus_ident;
 pub mod janus_kv;
+pub mod janus_repo;
