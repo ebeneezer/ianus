@@ -1,7 +1,7 @@
 # Janus – Task-Framework-Vertrag
 
 Version: 0.2.1
-Status: ENTWURF – erneute Freigabe erforderlich (Sprachwechsel C -> Rust)
+Status: FREIGEGEBEN
 
 ## 1. Prinzip
 

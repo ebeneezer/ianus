@@ -1,7 +1,7 @@
 # Janus – Architekturvertrag
 
 Version: 0.3.1
-Status: ENTWURF – erneute Freigabe erforderlich (Sprachwechsel C -> Rust)
+Status: FREIGEGEBEN
 
 ## 1. Überblick
 

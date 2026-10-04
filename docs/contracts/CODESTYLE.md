@@ -1,7 +1,7 @@
 # Janus – Code-Style-Vertrag
 
 Version: 0.3.0
-Status: ENTWURF – erneute Freigabe erforderlich (Sprachwechsel C -> Rust)
+Status: FREIGEGEBEN
 
 ## 1. Backend (Rust)
 
