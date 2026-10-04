@@ -1,7 +1,7 @@
 # Janus – UX-Workflow-Vertrag
 
-Version: 0.1.3
-Status: FREIGEGEBEN
+Version: 0.1.4
+Status: ENTWURF – erneute Freigabe erforderlich
 
 ## 1. Zentrale Metapher
 
@@ -114,6 +114,22 @@ Erreichbar über Einstellungen-Icon in der Toolbar:
 - Primärziel: Desktop-Browser (≥ 1280px).
 - Tablet (≥ 768px): Sidebar einklappbar, Job-Dock als unteres Panel.
 - Mobil: Nicht im Kernscope, aber Layout bricht nicht.
+
+### 5.1 Pane-Größen und Layout-Persistenz
+
+- Panes sind per Maus veränderbar (Trenner zwischen den Panels ziehen);
+  Doppelklick auf einen Trenner setzt die Spalten auf Standardgrößen zurück.
+- Das Web-UI wächst dynamisch vertikal mit seinen Inhalten (z. B. Task-Objekte
+  unten); Scrollen bleibt auf die betroffenen Panels beschränkt.
+- Layoutänderungen werden sofort gesichert (entprellt) – ohne explizites
+  „Speichern“.
+- Layout und UI-Zustand (offene Hosts/Detail-Objekte, expandierte Baumknoten,
+  Task-Entwürfe) überstehen Browser-Reloads und Backend-Restarts.
+- Persistenzort ist der `cfg/`-Keyspace im Backend über die KV Access API
+  (kein separater UI-Zustandsspeicher, keine doppelte Datenhaltung): Der Daemon
+  lädt den Zustand beim Start, der Client beim Verbinden.
+- Mit Einführung der Benutzerverwaltung wird das Layout benutzerspezifisch
+  gespeichert; bis dahin global.
 
 ## 6. Design-Sprache
 
