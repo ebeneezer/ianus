@@ -14,6 +14,7 @@ pub fn temp_db(name: &str) -> PathBuf {
 }
 
 /// Builds a key from ASCII parts; panics on invalid input (tests only).
+#[allow(dead_code)]
 pub fn key(parts: &[&str]) -> Key {
 	Key::from_parts(parts).expect("valid key")
 }
