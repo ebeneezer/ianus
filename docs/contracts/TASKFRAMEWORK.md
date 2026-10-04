@@ -1,7 +1,7 @@
 # Janus – Task-Framework-Vertrag
 
-Version: 0.2.1
-Status: FREIGEGEBEN
+Version: 0.3.0
+Status: ENTWURF – erneute Freigabe erforderlich (Borg-2-Festlegung, C-Reste, Restore-Sicherheit)
 
 ## 1. Prinzip
 
@@ -94,7 +94,29 @@ statisch; Phase 2 kann dynamisch ladbare Module unterstützen.
 - `benchmark` (Borg-Benchmark)
 - Custom-Tasks über Plugin-Interface
 
-## 5. Drag-&-Drop-Kompatibilität
+## 5. Restore-Sicherheitsgrenze
+
+- `borg extract` schreibt in das aktuelle Arbeitsverzeichnis des
+  Subprozesses und hat keinen Zielparameter. Der Task-Runner setzt daher
+  das **validierte Job-Zielverzeichnis** als CWD des Borg-Subprozesses –
+  die Zielentscheidung fällt im validierten Job-Objekt, niemals in einer
+  ungeprüften UI-Pfadauswahl.
+- **Zielvalidierung**: absoluter, kanonischer Zielpfad; existierende
+  Symlinks werden bei der Validierung nicht verfolgt (O_NOFOLLOW-
+  Semantik). Der Restore bleibt auf dieses Ziel beschränkt.
+- **Kollisionen**: Items, die denselben Zielpfad erzeugen würden (auch
+  über verschiedene Repos/Archive hinweg), werden vor Ausführung erkannt.
+  Standard: Abbruch mit Klartext-Befund; `overwrite`/`skip` sind
+  explizite, protokollierte Ausnahmen – kein stillschweigendes
+  Überschreiben.
+- **Symlinks**: extrahierte Symlinks werden als Symlinks erzeugt (kein
+  Follow beim Schreiben); ein im Ziel bereits existierender Symlink, der
+  aus dem Ziel hinausführt, bricht den Job ab.
+- **Berechtigungsprüfung pro Item**: `validate()` prüft die Rolle des
+  auslösenden Benutzers je Item (Repo-Scope), bevor irgendein Subprozess
+  startet.
+
+## 6. Drag-&-Drop-Kompatibilität
 
 Jeder Task definiert, welche Objekttypen als Eingabe akzeptiert werden:
 
@@ -109,7 +131,7 @@ Jeder Task definiert, welche Objekttypen als Eingabe akzeptiert werden:
 Das Frontend nutzt diese Information, um visuelles Feedback beim Drag zu geben
 (grüner Rahmen = kompatibel, roter Rahmen = inkompatibel).
 
-## 6. Fortschrittsmeldung
+## 7. Fortschrittsmeldung
 
 ```rust
 pub struct Progress {
@@ -137,7 +159,7 @@ Der Daemon sendet Fortschritt über WebSocket an verbundene Clients.
   Arbeitselemente/Zähler. Granulare Borg-Fortschrittsdaten werden nicht erfunden,
   wenn sie nicht verfügbar sind.
 
-## 7. Berechtigungen
+## 8. Berechtigungen
 
 Jeder Task deklariert seine erforderliche Rolle. Der Task-Runner prüft vor
 `execute()`, ob der auslösende Benutzer die Rolle im relevanten Scope besitzt.

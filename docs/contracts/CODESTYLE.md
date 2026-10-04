@@ -1,6 +1,6 @@
 # Janus – Code-Style-Vertrag
 
-Version: 0.3.0
+Version: 0.4.0
 Status: FREIGEGEBEN
 
 ## 1. Backend (Rust)
@@ -52,8 +52,9 @@ Status: FREIGEGEBEN
 
 - Einrückung ausschließlich mit Tabs; Tabstopps sind 3 Spalten breit.
 - Klammerstil: K&R (öffnende Klammer auf derselben Zeile).
-- Handgeschriebene Quellcodedateien dürfen höchstens 1000 Zeichen enthalten,
-  einschließlich Leerraum und Kommentaren. Bei drohender Überschreitung wird der
+- Handgeschriebene Quellcodedateien dürfen höchstens 2000 Zeichen enthalten
+  (Anordnung des Auftraggebers: 2000 statt 1000, um Fragmentierung zu
+  vermeiden), einschließlich Leerraum und Kommentaren. Bei drohender Überschreitung wird der
   Code automatisch entlang semantisch zusammengehöriger Verantwortlichkeiten auf
   mehrere Dateien mit passenden Namen aufgeteilt oder refaktoriert. Die Aufteilung
   darf keine unnötigen Abstraktionen oder künstliche Fragmentierung erzeugen.

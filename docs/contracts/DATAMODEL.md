@@ -1,7 +1,7 @@
 # Janus – Datenmodell-Vertrag
 
-Version: 0.2.0
-Status: FREIGEGEBEN
+Version: 0.3.0
+Status: ENTWURF – erneute Freigabe erforderlich (Borg-2-Festlegung, C-Reste, Restore-Sicherheit)
 
 ## 1. Kernentitäten
 
@@ -32,8 +32,8 @@ Tabellenpersistenz. Physische Datenhaltung ist ausschließlich das KV-Backend
 |--------------|--------------|--------------------------------------------|
 | id           | UUID/INTEGER | Primärschlüssel                            |
 | repo_id      | FK → repos   | Zugehöriges Repository                     |
-| borg_id      | TEXT         | Borg-interne Archiv-ID                     |
-| name         | TEXT         | Archivname (z. B. Hostname-Timestamp)      |
+| aid          | TEXT         | Borg-2-`aid:` (eindeutige Instanz)                     |
+| name         | TEXT         | Serienname (Borg 2: nicht eindeutig)      |
 | hostname     | TEXT         | Quell-Hostname                             |
 | created_at   | TIMESTAMP    | Erstellungszeitpunkt im Borg-Archiv        |
 | nfiles       | BIGINT       | Anzahl Dateien                             |
@@ -59,7 +59,7 @@ Dies ist die zentrale Tabelle für den "Merged Filesystem Tree":
 | hash         | TEXT NULL     | Content-Hash (wenn von Borg geliefert)     |
 
 **Indizes**:
-- `(repo_id, path, mtime DESC)` – für "aktuellste Version pro Pfad"
+- `(repo_id, path, Archiv-Rangfolge)` – Rang nach Archivfolge, nicht mtime – für "aktuellste Version pro Pfad"
 - `(repo_id, parent_path)` – für Verzeichnis-Listing
 - `(archive_id)` – für Archiv-bezogene Abfragen
 
@@ -68,8 +68,9 @@ Dies ist die zentrale Tabelle für den "Merged Filesystem Tree":
 Der `current_tree` ist eine **logische Abfrage**, kein operatives SQL-View:
 Sobald das KV-Backend kanonisch ist, kann kein SQL-View als zweites Modell
 bestehen bleiben. Semantik: Für jedes Repository wird über die aktuelle
-veröffentlichte Generation (Generation-Mitgliedschaft) je Pfad der neueste
-Pfadeintrag aus den Archiven dieser Generation zurückgegeben. Die
+veröffentlichte Generation (Generation-Mitgliedschaft) je Pfad der Pfadeintrag aus dem jüngsten Archiv der Generation, das den
+Pfad enthält, zurückgegeben – Rangfolge der Archive nach Anlege-Reihenfolge;
+Datei-mtime ist Metadatum, nie Rangkriterium. Die
 Implementierung nutzt API-Prefix-Scans und das Index-Design der Store API –
 kein SQL-View als zweites Datenmodell. Der Baum berücksichtigt ausschließlich
 Archive der vollständig veröffentlichten aktuellen Generation.
@@ -209,7 +210,8 @@ Schlüssel sind stabile, nicht-JSON-hierarchische Namespaces und Identifikatoren
 
 ### 2.3 Store API
 
-- **Eine einzige öffentliche C-API** mit `get`, `put`, `delete`,
+- **Eine einzige öffentliche Access API** (Rust-Trait `janus_kv::KvStore`,
+  Tranche R-1) mit `get`, `put`, `delete`,
   `prefix-scan` (begrenzte Seiten/Cursor) sowie Batch-/Transaktionssemantik.
 - Backend-Adapter sind intern; es werden **keine** mehreren Subsystem-APIs
   oder Bypässe erzeugt.
@@ -225,7 +227,7 @@ Schlüssel sind stabile, nicht-JSON-hierarchische Namespaces und Identifikatoren
 - Der Runtime Host Cache ist **abgeleitet und volatil**; ein offener
   Host/Repo hält einen **Lease**.
 - Records werden **on-demand in begrenzten Seiten** in einen indizierten
-  C-Cache geladen; Verwendung für Filterung und Job-Zusammenstellung.
+  In-Memory-Cache geladen; Verwendung für Filterung und Job-Zusammenstellung.
 - `close` gibt den Lease frei und startet einen kurzen Grace-Timer; evictiert
   wird erst nach Ablauf der Frist und ohne UI-/Job-Lease.
 - Job-Items persistieren gepinnte IDs/Generation im KV und müssen bei
@@ -250,16 +252,26 @@ Schlüssel sind stabile, nicht-JSON-hierarchische Namespaces und Identifikatoren
 
 ## 3. Indexierungsstrategie
 
-1. **Vollindexierung**: Beim Hinzufügen eines Repos werden alle Archive
-   via `borg list --json-lines <repo>::<archive>` eingelesen.
+1. **Vollindexierung (Borg 2)**: Beim Hinzufügen eines Repos werden alle
+   Archive eingelesen – Repository via `-r`/`BORG_REPO`, Archiv positional
+   (kein `repo::archive`). `--json-lines` nur für UTF-8-sichere Felder;
+   Byte-Pfadtreue zwingend über non-JSON `--format` (`bpath`), da `bpath`
+   in JSON/JSONL nicht verfügbar ist (JSON verlangt valides UTF-8).
+   **Blockierende offene Anforderung vor der Indexer-Tranche**: Nachweis
+   der Byte-Pfadtreue mit realen non-UTF8-Dateinamen gegen ein echtes
+   Borg-2-Repo; erst danach gelten Restore-Identitäten als stabil.
 2. **Generationen**: Jeder Index-Lauf erzeugt und füllt eine neue Generation
    (`state = building`). Erst nach erfolgreichem Indexieren wird sie atomar
    als `published` veröffentlicht und als `current_generation_id` gesetzt;
    bei einem Fehler bleibt die bisherige aktuelle Generation verfügbar.
-3. **Inkrementelle Indexierung**: Bei erneutem Index-Lauf werden nur neue
-   Archive (id > last_indexed_archive_id) verarbeitet. Die neue Generation
-   referenziert die bereits indexierten Archive weiterhin, ohne deren
-   Pfadmetadaten doppelt zu speichern.
+3. **Inkrementelle Indexierung**: Bei erneutem Index-Lauf wird die
+   vollständige Archivliste des Repos mit dem Index abgeglichen: neu ist,
+   was im Repo existiert, aber nicht indexiert ist; entfernt ist, was
+   indexiert war, aber nicht mehr im Repo existiert (erkannte Löschungen
+   werden aus der neuen Generation ausgeschlossen). Kein ID-Vergleich
+   (`id > last_indexed` – erkennt Löschungen nicht). Die neue Generation
+   referenziert die weiterhin existierenden indexierten Archive, ohne
+   deren Pfadmetadaten doppelt zu speichern.
 4. **Hintergrund**: Der Indexer läuft als Thread im Daemon oder als
    separater Timer-getriggerter Prozess.
 5. **Größenordnung**: Der Pfad-Index kann bei großen Repos Millionen Zeilen

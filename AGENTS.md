@@ -12,7 +12,7 @@
 
 - Backend: Rust (Edition 2024). See `docs/contracts/CODESTYLE.md`.
 - Rust formatting: tabs only, tab size 3 (rustfmt.toml with hard_tabs).
-- Handwritten source files have a hard limit of 1000 characters, including whitespace and comments; refactor and split semantically into appropriately named modules/files before exceeding it. Generated and vendored files are exempt.
+- Handwritten source files have a hard limit of 2000 characters (raised from 1000 by the maintainer to avoid fragmentation), including whitespace and comments; refactor and split semantically into appropriately named modules/files before exceeding it. Generated and vendored files are exempt.
 - Prefer table-driven dispatch over long `if`/`else if` chains where it clarifies control flow.
 - Prioritize efficiency, code reuse, and minimal RSS; avoid unnecessary abstractions.
 - No Janus identifier may start with an underscore; no reserved-identifier look-alikes.

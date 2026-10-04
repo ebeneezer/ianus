@@ -1,7 +1,7 @@
 # Janus – UX-Workflow-Vertrag
 
-Version: 0.2.0
-Status: FREIGEGEBEN
+Version: 0.3.0
+Status: ENTWURF – erneute Freigabe erforderlich (Borg-2-Festlegung, C-Reste, Restore-Sicherheit)
 
 ## 1. Zentrale Metapher
 
@@ -73,7 +73,10 @@ Auf jedes Objekt (Datei oder Verzeichnis):
 - Ein definierter Bereich (z. B. unterer Rand oder spezielles Drop-Target),
   auf den man einen Job zieht um ihn zu starten.
 - Vor Ausführung: Bestätigungsdialog mit Zusammenfassung (was, wohin, geschätzte Dauer).
-- Bei Restore: Zielverzeichnis-Auswahl im Dialog.
+- Bei Restore: Zielverzeichnis-Auswahl im Dialog mit Validierung und
+  Kollisionsauflösung (fail/overwrite/skip, Standard fail) gemäß
+  TASKFRAMEWORK §5 (Restore-Sicherheitsgrenze); Symlink-Befunde werden
+  angezeigt, nicht stillschweigend übergangen.
 - Vor Ausführung werden Revision/Referenzen der gepinnten Items validiert. Bei
   fehlenden oder inkonsistenten referenzierten Daten bricht der Job ab, statt
   unbemerkt auf die neueste Version umzuschalten.

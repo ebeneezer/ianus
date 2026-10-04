@@ -1,7 +1,7 @@
 # Janus – Architekturvertrag
 
-Version: 0.3.1
-Status: FREIGEGEBEN
+Version: 0.4.0
+Status: ENTWURF – erneute Freigabe erforderlich (Borg-2-Festlegung, C-Reste, Restore-Sicherheit)
 
 ## 1. Überblick
 
@@ -26,7 +26,9 @@ sofortigen Abbruch, sondern einen sauberen, nachvollziehbaren Ablauf.
 Auftraggebers): Cancel-Anfrage → SIGTERM an die Prozessgruppe des Kindes →
 kurze Grace-Periode → SIGKILL (letzte Instanz, „der Hammer"). Ein per SIGKILL
 beendetes Borg kann stale Repository-Locks hinterlassen; der Daemon meldet
-dies offen und bietet die Lock-Bereinigung an (`break-lock`, Task-Katalog).
+dies offen und bietet die Lock-Bereinigung an (`break-lock`, Task-Katalog; neuere
+Borg-2-Betas verlangen dafür Passphrase/Key-Zugriff, lösbar über die
+Secret-Referenz).
 Eigene asynchrone Daemon-Arbeit (DB-Transaktionen, Stream-Parsing) bricht an
 definierten Abbruchpunkten kooperativ ab; SQLite-Transaktionen rollen
 zurück. Der Hammer ist demnach die Ausnahme, nicht das Mittel der Wahl.
@@ -72,9 +74,19 @@ flowchart TB
   inkrementell/streamend geparst (serde `StreamDeserializer`-Prinzip oder
   handgefilterter NDJSON-Reader); eine ganze große Borg-Antwort wird niemals
   vollständig als DOM im Speicher gehalten.
+- **Zielversion (Auftraggeberfestlegung)**: ausschließlich **Borg 2 Beta**
+  (2.0.0b-Serie); Borg 1 wird nicht unterstützt – die Pflege beider
+  Versionen wäre zu codeaufwändig. Migration Borg 1 → 2 erfolgt per
+  `borg transfer` (Phase-3-Task). Die konkret getestete Beta-Version wird
+  gegen den Borg-Server des Auftraggebers verifiziert und hier nachgetragen
+  (offene Anforderung).
+- **Borg-2-Adressierung**: kein `repo::archive`; Repository via `-r`/
+  `BORG_REPO`, Archiv positional; eindeutige Archiv-Instanz via `aid:`-
+  Präfix; Mengenauswahl via `-a`/`--match-archives`.
 - **Borg-Integration**: Subprozess-Steuerung (`std::process::Command`,
-  asynchron via tokio), Parsen von `--json` / `--json-lines`-Ausgaben.
-  Kein Python-Embedding.
+  asynchron via tokio). `--json`/`--json-lines` nur für UTF-8-sichere Felder;
+  Byte-Pfadtreue über non-JSON `--format` (`bpath` fehlt in JSON-Ausgaben,
+  siehe DATAMODEL §3.1). Kein Python-Embedding.
 - **Secrets**: `systemd-creds` oder `BORG_PASSCOMMAND`; niemals Klartext in
   Konfigurationsobjekten.
 - **Build**: cargo (Rust-Standard); CMake entfällt.
@@ -90,6 +102,9 @@ Ein `Repository`-Objekt kapselt alles für den Zugriff auf ein Borg-Repo:
 | SFTP           | `sftp_host`, `sftp_user`, `sftp_port`, `path`    |
 | Borg-Server    | `borg_host`, `borg_user`, `borg_port`, `path`    |
 
+Borg 2 bildet die Transporte nativ ab: `local` (Pfad), `ssh://` (auch für
+Hosts mit `borg serve`), `sftp://` (nativ über borgstore) – Remote-URLs
+werden aus den Transportfeldern gebildet, kein `repo::archive` mehr.
 Zugriffskonfigurationen werden in der DB gespeichert; Passphrasen und
 SSH-Schlüssel werden über referenzierte Secret-IDs (systemd-creds oder
 verschlüsselt in der DB mit einem Master-Key) aufgelöst, nie inline.
@@ -98,8 +113,9 @@ verschlüsselt in der DB mit einem Master-Key) aufgelöst, nie inline.
 
 Die Persistenz ist zweistufig aufgebaut:
 
-1. **KV Access API (kanonisch)**: eine einzige C-Key/Value-Zugriffs-API
-   (`get`, `put`, `delete`, `prefix-scan` mit begrenzten Seiten/Cursor sowie
+1. **KV Access API (kanonisch)**: eine einzige kanonische Key/Value-Zugriffs-API (Rust-Trait
+   `janus_kv::KvStore`, Tranche R-1) mit `get`, `put`, `delete`,
+   `prefix-scan` (begrenzte Seiten/Cursor) sowie
    Batch-/Transaktionssemantik), die von **allen Fachmodulen** verwendet wird.
    Kein Fachmodul darf direkt Backend-spezifische DB-Aufrufe nutzen.
 2. **Backend-Adapter**: SQLite (rusqlite, gebündelt) und PostgreSQL (tokio-postgres) als
@@ -125,7 +141,7 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
 - Er ist explizit **kein zweiter Persistenzbestand** und **kein DB-Cache**;
   der alleinige persistente Wahrheitsbestand bleibt das KV-Backend.
 - Beim Öffnen eines Hosts/Repos werden die Daten über die Store API
-  **on-demand und seitenweise** geladen und in einer C-Struktur mit für
+  **on-demand und seitenweise** geladen und in einer indizierten In-Memory-Struktur mit für
   Filterung und Jobsteuerung geeigneten Indizes gehalten.
 - Ein offener Host/Repo hält einen **Lease** auf den Cache. `host close`
   startet eine **Grace-Periode**; die tatsächliche Eviction erfolgt erst,
