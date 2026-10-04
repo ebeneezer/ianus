@@ -1,7 +1,7 @@
 # Janus – Architekturvertrag
 
-Version: 0.1.2
-Status: FREIGEGEBEN
+Version: 0.1.3
+Status: ENTWURF – erneute Freigabe erforderlich
 
 ## 1. Überblick
 
@@ -93,6 +93,12 @@ und Metriken (Key/Namespace, Resultatgröße, Fehler). JSON-Payloads und Secrets
 werden niemals geloggt. Es gibt keinen DB-eigenen zweiten Cache; der alleinige
 persistente Wahrheitsbestand ist das KV-Backend.
 
+Die **Janus-Eigenkonfiguration** (Color-Theme, UI-Sprache, künftige
+Einstellungen) liegt in einem **eigenen lokalen SQLite-Speicher** hinter
+derselben KV Access API: Der Daemon bleibt auch bei unerreichbarem
+Remote-Backend bootstrap- und konfigurierbar. Eigenkonfiguration und
+Indexbestand sind disjunkte Datenmengen – keine doppelte Datenhaltung.
+
 ## 6. Runtime Host Cache
 
 Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
@@ -121,6 +127,9 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
 - Design-Sprache: CleanMyMac-inspiriert – helles, aufgeräumtes UI, Karten-Metapher
   für Jobs, sanfte Animationen.
 - WebSocket für Echtzeit-Fortschritt laufender Tasks.
+- UI-Sprache und Farbtheme sind einstellbar: Themes als CSS-Custom-Properties
+  (Laufzeitumschaltung ohne Neustart), Übersetzungen als statische Bundles;
+  im Konfig-Speicher liegen nur die gewählten Werte.
 
 ## 8. systemd-Integration
 
@@ -158,6 +167,8 @@ Ein zentrales, persistiertes Objekt mit Unterobjekten:
 - `roles[]` – Rollen mit Berechtigungen (`repo:read`, `restore:execute`, `task:prune`, `admin:config`, …)
 - `tasks[]` – Registrierte Task-Typen
 - `jobs[]` – Job-Instanzen und -Historie
+- `cfg[]` – Janus-Eigenkonfiguration: Color-Theme, UI-Sprache, künftige
+  Einstellungen (eigener lokaler SQLite-Speicher, siehe §5)
 
 Im Web-UI wird dieses Objekt als navigierbarer Teilbaum dargestellt.
 

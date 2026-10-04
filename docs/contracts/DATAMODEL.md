@@ -1,7 +1,7 @@
 # Janus – Datenmodell-Vertrag
 
-Version: 0.1.2
-Status: FREIGEGEBEN
+Version: 0.1.3
+Status: ENTWURF – erneute Freigabe erforderlich
 
 ## 1. Kernentitäten
 
@@ -197,6 +197,7 @@ Schlüssel sind stabile, nicht-JSON-hierarchische Namespaces und Identifikatoren
 | Pfad | `path/<repo-id>/<archive-id>/<encoded-relative-path-segments>` |
 | Job | `job/<job-id>` |
 | Job-Item | `job-item/<job-id>/<item-id>` |
+| Janus-Konfiguration | `cfg/<schlüssel>` |
 
 - Pfadsegmente benötigen eine **verlustfreie Kodierung** für beliebige
   POSIX-Bytes und eine trenner-sichere Hierarchie; der benutzersichtbare
@@ -234,6 +235,18 @@ Schlüssel sind stabile, nicht-JSON-hierarchische Namespaces und Identifikatoren
   kein stiller Dirty-Write-Back.
 - Speicher sorgfältig begrenzen; kein unbegrenzter Whole-Host-Load.
 - Keine separaten persistenten Cache-Entitäten einführen.
+
+### 2.5 Janus-Eigenkonfiguration (`cfg/`)
+
+- Die Janus-Eigenkonfiguration (Color-Theme, UI-Sprache, künftige
+  Einstellungen) liegt in einem **eigenen lokalen SQLite-Speicher** hinter
+  derselben Store API – bootstrap-fähig, auch wenn ein entferntes
+  DB-Backend unerreichbar ist.
+- Eigenkonfiguration und Indexbestand sind **disjunkte Datenmengen**; das
+  ist keine doppelte Datenhaltung.
+- UI-Übersetzungstexte und Theme-Definitionen sind **statische
+  Frontend-Ressourcen**; im Store liegen nur die gewählten Werte (Sprache,
+  Theme) als versionierte JSON-Objekte.
 
 ## 3. Indexierungsstrategie
 
