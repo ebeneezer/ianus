@@ -1,7 +1,7 @@
 # Janus – Architekturvertrag
 
-Version: 0.1.3
-Status: ENTWURF – erneute Freigabe erforderlich
+Version: 0.2.0
+Status: FREIGEGEBEN
 
 ## 1. Überblick
 
@@ -126,6 +126,14 @@ Der Runtime Host Cache ist ein **volatiler, process-lokaler** Cache im Daemon:
   Reaktivität ohne VDOM (Live-Task-Ticker, große lazy Trees), eingebaute
   Transition-Engine für die CleanMyMac-Anmutung (`prefers-reduced-motion`
   ist Idiom, nicht Nachbau), kleine Runtime, minimaler Dependency-Churn.
+- **JS-Quarantäne (verbindlich)**: JavaScript existiert ausschließlich als
+  Build-Artifact. Handgeschriebene `.js`-Dateien sind im Frontend-Quellbaum
+  verboten und per Linter/CI zu erzwingen; geschrieben wird nur `.svelte`
+  und `.ts` (TypeScript `strict`, `any` verboten). Der Daemon, alle
+  Build-Skripte für Artefakte und jede Logik außerhalb des Browsers bleiben
+  reines C. WASM/C-Routen sind geprüft und bewusst verworfen: kein direkter
+  DOM-Zugriff ohne JS-Klebstoff, kein reifes Komponenten-/DnD-Ökosystem,
+  geschätzter Mehrfachaufwand für das interaktionsgetriebene UI.
 - Kein UI-Kit (MUI/Chakra/Bootstrap): das individuelle Objekt-Design wird
   als eigene Primitives gebaut – CSS-Custom-Properties mit der verbindlichen
   Palette aus WORKFLOW §6.

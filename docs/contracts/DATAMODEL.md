@@ -1,7 +1,7 @@
 # Janus – Datenmodell-Vertrag
 
-Version: 0.1.3
-Status: ENTWURF – erneute Freigabe erforderlich
+Version: 0.2.0
+Status: FREIGEGEBEN
 
 ## 1. Kernentitäten
 

@@ -1,7 +1,7 @@
 # Janus – UX-Workflow-Vertrag
 
-Version: 0.1.4
-Status: ENTWURF – erneute Freigabe erforderlich
+Version: 0.2.0
+Status: FREIGEGEBEN
 
 ## 1. Zentrale Metapher
 

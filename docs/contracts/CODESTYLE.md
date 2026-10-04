@@ -1,7 +1,7 @@
 # Janus – Code-Style-Vertrag
 
-Version: 0.1.6
-Status: ENTWURF – erneute Freigabe erforderlich (Frontend-Stack-Festlegung)
+Version: 0.2.0
+Status: FREIGEGEBEN
 
 ## 1. C-Backend
 
@@ -76,6 +76,9 @@ Status: ENTWURF – erneute Freigabe erforderlich (Frontend-Stack-Festlegung)
 
 - Svelte 5 + Vite + TypeScript (verbindlich, siehe ARCHITECTURE §7); ESLint
   und Prettier-Konfiguration werden mit der Frontend-Tranche eingebracht.
+- **JS-Quarantäne**: handgeschriebene `.js`-Dateien sind im Frontend-Quellbaum
+  verboten (Linter/CI-Regel); nur `.svelte` und `.ts`, TypeScript `strict`,
+  `any` verboten. JavaScript ausschließlich als Build-Artifact.
 - ESLint + Prettier als Formatierer.
 - Komponenten-Namen: PascalCase.
 - Keine `any`-Types in TypeScript.
