@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Janus — Mockup 03 · Matroschka</title>
+<title>Janus — Mockup 04 · Dialoge, Tasks, Strich-Bäume</title>
 <style>
 :root{color-scheme:light dark;
 --page:#edf0ef;--paper:#fff;--panel:#f7f9f8;--line:#e1e7e4;--ink:#202927;--muted:#6e7975;--soft:#909a96;
---accent:#168b78;--accent-pale:#e7f4f0;--accent-line:#9acbbd;--danger:#b3564d;
+--accent:#168b78;--accent-pale:#e7f4f0;--accent-line:#9acbbd;--danger:#b3564d;--treeline:#c3ccc8;
 --shadow:0 14px 40px #17251f12;--card:0 3px 12px #18231e08}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){
 --page:#151918;--paper:#1d2321;--panel:#232a28;--line:#2f3734;--ink:#e3eae7;--muted:#9aa8a3;--soft:#76827e;
---accent:#3fb394;--accent-pale:#20312c;--accent-line:#33544b;--danger:#d98177;
+--accent:#3fb394;--accent-pale:#20312c;--accent-line:#33544b;--danger:#d98177;--treeline:#3a4441;
 --shadow:0 14px 40px #00000066;--card:0 3px 12px #00000055}}
 :root[data-theme=dark]{
 --page:#151918;--paper:#1d2321;--panel:#232a28;--line:#2f3734;--ink:#e3eae7;--muted:#9aa8a3;--soft:#76827e;
---accent:#3fb394;--accent-pale:#20312c;--accent-line:#33544b;--danger:#d98177;
+--accent:#3fb394;--accent-pale:#20312c;--accent-line:#33544b;--danger:#d98177;--treeline:#3a4441;
 --shadow:0 14px 40px #00000066;--card:0 3px 12px #00000055}
 *{box-sizing:border-box}
 body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:26px 20px 44px}
@@ -24,23 +24,23 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 .eyebrow{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:680}
 .intro h1{font-size:23px;letter-spacing:-.035em;margin:4px 0}
 .intro p{margin:0;color:var(--muted);font-size:14px}
-.tip{font-size:12px;color:var(--muted);max-width:400px;text-align:right}
+.tip{font-size:12px;color:var(--muted);max-width:430px;text-align:right}
 .app{border:1px solid var(--line);border-radius:15px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
 .toolbar{height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
 .brand{font-weight:730;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
 .mark{width:23px;height:23px;border-radius:7px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:13px}
 .tool-right{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
 .statusdot{width:7px;height:7px;border-radius:50%;background:#45a884;display:inline-block;margin-right:5px}
-.workbench{min-height:600px;display:grid;grid-template-columns:minmax(200px,.8fr) minmax(320px,1.3fr) minmax(300px,1.1fr);gap:1px;background:var(--line);position:relative;transition:grid-template-columns .24s ease}
-.workbench.has-host{grid-template-columns:72px minmax(340px,1.35fr) minmax(340px,1.3fr)}
+.workbench{min-height:600px;display:grid;grid-template-columns:minmax(200px,.8fr) minmax(320px,1.3fr) minmax(320px,1.1fr);gap:1px;background:var(--line);position:relative;transition:grid-template-columns .24s ease}
+.workbench.has-host{grid-template-columns:72px minmax(340px,1.35fr) minmax(360px,1.3fr)}
 .zone{background:var(--page);padding:12px;min-width:0;transition:background .16s}
 .zone.drop-target{background:var(--accent-pale)}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:11px;overflow:hidden;min-height:190px;box-shadow:var(--card)}
-.panel-head{height:40px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 11px}
-.panel-name{font-size:12px;font-weight:690}
-.panel-close,.host-close{border:0;background:none;color:var(--soft);font-size:13px;cursor:pointer;padding:4px 6px;border-radius:7px}
+.panel-head{height:40px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 11px;flex:none}
+.panel-name{font-size:12px;font-weight:690;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel-close,.host-close{border:0;background:none;color:var(--soft);font-size:13px;cursor:pointer;padding:4px 6px;border-radius:7px;flex:none}
 .panel-close:hover,.host-close:hover{background:var(--accent-pale);color:var(--ink)}
-.panel-body{padding:12px}
+.panel-body{padding:10px 12px;max-height:430px;overflow:auto}
 .object{display:flex;gap:12px;align-items:center;border-radius:9px;padding:9px 8px;margin:2px 0;transition:background .16s;cursor:grab;min-height:50px}
 .object:hover{background:var(--accent-pale)}
 .object[draggable]:active{cursor:grabbing}
@@ -60,57 +60,96 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 .host-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px}
 .host-head h2{font-size:16px;margin:0 0 2px;letter-spacing:-.02em}
 .host-head p{font-size:11px;color:var(--muted);margin:0}
-.pill{border-radius:20px;background:var(--accent-pale);color:var(--accent);font-size:10px;font-weight:680;padding:4px 9px;white-space:nowrap}
+.pill{border-radius:20px;background:var(--accent-pale);color:var(--accent);font-size:10px;font-weight:680;padding:4px 9px;white-space:nowrap;flex:none}
 .children{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;padding:10px;background:var(--panel);border-top:1px solid var(--line)}
 .detail-stack{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));align-content:start;align-items:start;gap:9px;transition:grid-template-columns .2s ease}
 .detail-stack .panel{min-height:unset}
-.detail-stack .panel-body{padding:10px;max-height:430px;overflow:auto}
-.config-list{font-size:11px;color:var(--muted);display:grid;grid-template-columns:110px 1fr;gap:7px}
-.config-list b{color:var(--ink);font-weight:560;overflow-wrap:anywhere}
-.config-note{grid-column:1/-1;font-size:10px;color:var(--soft);margin-top:6px}
-.tree .row{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:7px;font-size:12px;user-select:none}
-.row.dir{font-weight:640;cursor:pointer}
-.row.leaf{color:var(--muted);cursor:pointer}
-.row:hover{background:var(--accent-pale)}
-.row.selected{background:var(--accent-pale);color:var(--accent)}
-.row.hidden{display:none}
-.tw{width:13px;flex:none;color:var(--soft);font-size:10px;text-align:center}
-.tn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meta{font-size:10px;color:var(--soft);margin-left:auto;white-space:nowrap}
-.badge{font-size:10px;color:var(--accent);background:var(--accent-pale);border-radius:999px;padding:1px 7px;flex:none}
-.mark-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;display:none}
-.row.marked .mark-dot{display:block}
-.pinmark{flex:none;color:var(--accent);font-size:11px;display:none}
-.row.pinned .pinmark{display:block}
-.row[draggable]:active{cursor:grabbing}
-.row.dragging{opacity:.45}
-.filter-bar{display:flex;gap:6px;margin-bottom:8px}
-.filter-bar input{flex:1;min-width:0;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font:inherit;font-size:11px;background:var(--paper);color:var(--ink)}
-.mini{border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:7px;font:inherit;font-size:10px;padding:4px 8px;cursor:pointer;flex:none}
+.panel.min{min-height:0}
+.panel.min .panel-body,.panel.min .objbar{display:none}
+.panel.min .panel-head{border-bottom:0;height:32px}
+.panel.min .panel-name{font-weight:560;color:var(--muted)}
+.panel.dialog{border-color:var(--accent-line)}
+.dialog{border:1px solid var(--accent-line);border-radius:12px;background:var(--paper);box-shadow:var(--card);overflow:hidden}
+.dialog-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.dialog-head b{font-size:13px}
+.dialog-body{padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6}
+.dialog-body b{color:var(--ink)}
+.dialog-foot{display:flex;gap:8px;justify-content:flex-end;padding:0 14px 13px}
+.fld{display:grid;gap:5px;margin:0 0 10px}
+.fld label{font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.06em}
+.fld input{border:1px solid var(--line);border-radius:7px;padding:6px 9px;font:inherit;font-size:12px;background:var(--paper);color:var(--ink);width:100%}
+.objbar{display:flex;gap:6px;flex-wrap:wrap;padding:0 0 9px;border-bottom:1px solid var(--line);margin-bottom:9px}
+.mini{border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:7px;font:inherit;font-size:10px;padding:4px 9px;cursor:pointer;flex:none}
 .mini:hover{border-color:var(--accent-line);color:var(--accent)}
+.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;font:inherit;font-size:11px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent-line)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.filter-bar{display:flex;gap:6px;margin-bottom:9px}
+.filter-bar input{flex:1;min-width:0;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font:inherit;font-size:11px;background:var(--paper);color:var(--ink)}
+.xtree{font-size:12px}
+.xsub{border-left:1px solid var(--treeline);margin-left:11px}
+.xrow{position:relative;display:flex;align-items:center;gap:8px;padding:5px 4px 5px 15px;border-radius:7px;user-select:none}
+.xrow::before{content:"";position:absolute;left:0;top:50%;width:10px;height:1px;background:var(--treeline)}
+.xsub>.xrow:last-child::after{content:"";position:absolute;left:-1px;top:calc(50% + 1px);bottom:-2px;width:1px;background:var(--paper)}
+.xtree>.xrow{padding-left:4px}
+.xtree>.xrow::before{display:none}
+.xtw{width:11px;flex:none;color:var(--soft);font-size:10px;text-align:center}
+.xname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xrow.dir{font-weight:640;cursor:pointer}
+.xrow.leaf{color:var(--muted);cursor:pointer}
+.xrow:hover{background:var(--accent-pale)}
+.xrow.selected{background:var(--accent-pale);color:var(--accent)}
+.xrow.hidden{display:none}
+.xmeta{font-size:10px;color:var(--soft);margin-left:auto;white-space:nowrap}
+.badge{font-size:10px;color:var(--accent);background:var(--accent-pale);border-radius:999px;padding:1px 7px;flex:none}
+.xpin{flex:none;color:var(--accent);font-size:11px;display:none}
+.xrow.pinned .xpin{display:block}
+.xdot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;display:none}
+.xrow.marked .xdot{display:block}
+.xrow[draggable]:active{cursor:grabbing}
+.xrow.dragging{opacity:.45}
 .loading{padding:16px 12px;display:grid;gap:10px}
 .load-phase{font-size:12px;color:var(--muted)}
 .load-note{font-size:10px;color:var(--soft)}
 .load-bar{height:4px;border-radius:99px;background:var(--line);overflow:hidden}
 .load-fill{height:100%;width:4%;background:var(--accent);animation:loadbar .9s linear forwards}
 @keyframes loadbar{to{width:100%}}
-.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;font:inherit;font-size:11px;padding:6px 12px;cursor:pointer}
-.btn:hover{border-color:var(--accent-line)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.dock{border-top:1px solid var(--line);background:var(--paper);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;transition:background .16s}
-.dock.drop-target{background:var(--accent-pale)}
-.dock-title{font-size:12px;font-weight:690}
-.dock-count{font-size:10px;color:var(--muted)}
-.dock-items{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:120px}
+.config-list{font-size:11px;color:var(--muted);display:grid;grid-template-columns:110px 1fr;gap:7px}
+.config-list b{color:var(--ink);font-weight:560;overflow-wrap:anywhere}
+.config-note{grid-column:1/-1;font-size:10px;color:var(--soft);margin-top:6px}
+.hrow{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:7px;font-size:11px}
+.hrow:hover{background:var(--accent-pale)}
+.taskpane{border-top:1px solid var(--line);background:var(--paper);transition:background .16s}
+.taskpane.drop-target{background:var(--accent-pale)}
+.taskpane-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.taskpane-head b{font-size:12px;font-weight:690}
+.taskpane-head span{font-size:10px;color:var(--muted)}
+.task-row{display:flex;flex-wrap:wrap;gap:9px;padding:10px 14px 14px}
+.task{border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:var(--card);flex:1 1 300px;min-width:270px;max-width:440px;display:flex;flex-direction:column}
+.t-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.t-copy{min-width:0;flex:1}
+.t-copy b{display:block;font-size:12px;font-weight:670}
+.t-copy span{font-size:10px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-body{padding:9px 12px;font-size:11px;flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:flex;align-items:center;gap:6px;background:var(--accent-pale);color:var(--accent);border-radius:999px;padding:4px 10px;font-size:10px;cursor:pointer}
 .chip b{font-weight:640}
-.dock-actions{display:flex;gap:8px}
-.foot{padding:9px 15px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:var(--muted);font-size:10px;flex-wrap:wrap}
+.chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
+.chip.hit{cursor:default}
+.t-note{color:var(--muted)}
+.progress{height:5px;border-radius:99px;background:var(--line);overflow:hidden;margin:7px 0 5px}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .55s ease}
+.t-meta{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted)}
+.t-actions{display:flex;gap:8px;padding:0 12px 11px}
+.task.t-done{border-color:var(--accent-line)}
 .ctx{position:fixed;min-width:215px;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:5px;z-index:50}
 .ctx-item{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:7px;font-size:12px;cursor:pointer}
 .ctx-item:hover{background:var(--accent-pale)}
 .ctx-sep{height:1px;background:var(--line);margin:4px 6px}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:12px;z-index:60;box-shadow:var(--shadow);max-width:70vw;text-align:center}
+.flash{animation:objflash .95s ease}
+@keyframes objflash{0%{background:var(--accent-pale);box-shadow:inset 0 0 0 1px var(--accent-line)}70%{background:var(--accent-pale)}100%{background:none;box-shadow:none}}
+.foot{padding:9px 15px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:var(--muted);font-size:10px;flex-wrap:wrap}
 .guide{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:18px 2px 0}
 .guide h2{font-size:13px;margin:0 0 6px}
 .guide p,.guide li{font-size:12px;line-height:1.55;color:var(--muted)}
@@ -122,19 +161,20 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 .workbench.has-host [data-zone=left] .panel-name:after{content:""}
 .workbench.has-host [data-zone=left] .object-copy{display:block}
 .guide{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <main class="page">
 <header class="intro">
 <div>
-<div class="eyebrow">Janus · UX-Mockup 03 · Matroschka</div>
-<h1>Objekte öffnen Objekte</h1>
-<p>Ein Modell: Host, Repo, Snapshot, Datei – alles Objekt. Ziehen öffnet, Schließen räumt auf.</p>
+<div class="eyebrow">Janus · UX-Mockup 04</div>
+<h1>Objekte, Dialoge, Tasks</h1>
+<p>Dialoge sind Objekte im Frame. Tasks leben unten als eigene Objekte. Bäume klassisch mit Strichen.</p>
 </div>
-<div class="tip">Host in den Workspace ziehen. Rechtsklick im Baum: Filter, Markieren, Restore vormerken, Historie.</div>
+<div class="tip">Vorbefüllt: atlas ist geöffnet, drei Detail-Objekte, drei Task-Objekte. Rechtsklick im Baum für versierte Nutzer.</div>
 </header>
-<section class="app" aria-label="Janus Mockup 03">
+<section class="app" aria-label="Janus Mockup 04">
 <div class="toolbar">
 <div class="brand"><span class="mark">J</span>janus</div>
 <div class="tool-right"><span><span class="statusdot"></span>Bereit</span><span>·</span><span>Backup-Wald</span></div>
@@ -147,7 +187,7 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 </article>
 </section>
 <section class="zone" data-zone="middle" id="workspaceZone" aria-label="Workspace">
-<article class="panel">
+<article class="panel" id="workspacePanel">
 <header class="panel-head"><span class="panel-name">Workspace</span></header>
 <div class="panel-body" id="workspaceBody"></div>
 </article>
@@ -156,35 +196,30 @@ body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-a
 <div class="detail-stack" id="detailStack"></div>
 </section>
 </div>
-<footer class="dock" id="dock" hidden>
-<span class="dock-title">Restore-Job</span>
-<span class="dock-count" id="dockCount"></span>
-<div class="dock-items" id="dockItems"></div>
-<div class="dock-actions">
-<button class="btn" id="dockClear">Leeren</button>
-<button class="btn primary" id="dockRun">Ausführen …</button>
-</div>
-</footer>
+<section class="taskpane" id="taskPane" aria-label="Tasks">
+<header class="taskpane-head"><b>Tasks</b><span>Vormerken erzeugt Objekte – das auslösende Objekt bleibt geöffnet.</span></header>
+<div class="task-row" id="taskRow"></div>
+</section>
 <div class="foot">
-<span>Host im Workspace öffnen: Archiv-Leiste klappt auf Objekt-Icons zusammen.</span>
-<span>Host schließen räumt alle Details auf – der Restore-Job bleibt gepinnt.</span>
+<span>Dialog-Objekt minimiert seine Nachbarn in der Pane; Schließen stellt sie wieder her. Keine gestapelten Ebenen.</span>
+<span>Objekt schließen: das Eltern-Objekt blitzt kurz auf. Host-Schließen mit Kindern fragt als Dialog nach.</span>
 </div>
 </section>
 <section class="guide">
 <div>
 <h2>Objektfluss</h2>
 <ol>
-<li>Host-Objekt aus dem Archiv in den leeren Workspace ziehen. Er öffnet sich mit drei inneren Objekten: <b>Repo</b>, <b>Archives</b>, <b>Config</b>.</li>
-<li>Jedes im Workspace geöffnete Objekt erscheint rechts als eigenes Detailpanel – automatisch nebeneinander oder untereinander angeordnet.</li>
-<li><b>Archives</b> öffnen, Snapshot wählen: Dateibaum des Snapshot-Zeitpunkts. Navigation per Klick, Funktionen per Rechtsklick.</li>
-<li><b>Repo</b> zeigt den gemergten, versionierten Baum (v-Badge = Anzahl Versionen). Blatt-Rechtsklick öffnet die Historie – jede Version einzeln vormerkbar.</li>
-<li>Dateien per Drag auf das Restore-Dock ziehen oder per Rechtsklick vormerken. Die gepinnte Version steht auf jedem Chip.</li>
-<li>Host im Workspace schließen: Workspace und alle Details leeren sich. Der Restore-Job überlebt (gepinnte Versionen).</li>
+<li>Host in den Workspace ziehen: er öffnet sich mit <b>Repo · Archives · Config</b>. Jedes dort geöffnete Objekt erscheint rechts als Detail.</li>
+<li>Snapshot-Objekte tragen eine <b>Knopfleiste im Rahmen</b>: Filter, Markieren, Restore, Historie, Aufklappen. Der Rechtsklick bleibt als Abkürzung.</li>
+<li>Blätter per Rechtsklick vormerken oder auf ein Task-Objekt unten ziehen: es entsteht/ändert sich ein <b>Restore-Task im Entwurf</b> – das Panel bleibt offen.</li>
+<li><b>Repo-Objekt → Filter-Objekt</b> (Rechtsklick): Dialog-Objekt in der Details-Pane, Nachbarn minimiert. „Als Task committen“ erzeugt ein neues Task-Objekt.</li>
+<li>Host schließen (✕) bei offenen Details: <b>Bestätigungs-Dialog ersetzt das Objekt</b> – bestätigen räumt auf, abbrechen zeigt es wieder.</li>
+<li>Beim Schließen eines Objekts blitzt das <b>Eltern-Objekt</b> kurz auf – kein Breadcrumb-Band.</li>
 </ol>
 </div>
 <div>
 <h2>Zu beurteilen</h2>
-<p>Ist die Matroschka-Öffnung verständlich – Host enthält Repo/Archives/Config, jedes davon öffnet eigene Details? Trägt das Kontextmenü die Funktionen (Filter, Markieren, Restore, Historie)? Ist richtig, dass der Restore-Job das Schließen des Hosts überlebt? Und: Sollen die Hosts auch im zusammengeklappten Archiv-Streifen sichtbar bleiben oder genügen Icons?</p>
+<p>Trägt die Knopfleiste am Snapshot die Funktionen sichtbar genug? Ist der Dialog-als-Objekt-Mechanismus (Nachbarn minimiert, Pane wird wiederhergestellt) verständlich? Ersetzt der Eltern-Flash die Breadcrumbs? Wirken Task-Objekte mit Entwurf/laufend/fertig und ehrlichem Fortschritt glaubwürdig? Sind die klassischen Strich-Bäume lesbar?</p>
 </div>
 </section>
 </main>
@@ -238,15 +273,17 @@ var HIST={
   {v:"v3",arch:"atlas-2026-09-28",when:"28.09.2026",size:"17 MB"}]
 };
 var PHASES=["Verbinde mit Index-Backend …","Lese Seiten aus dem Pfad-Index …","Baumknoten werden aufgebaut …"];
+var RESTORE_PHASES=["Stelle Restore-Job zusammen …","Extrahiere Objekte …","Prüfe Zielverzeichnis …","Stelle Berechtigungen wieder her …"];
 
-var openHostId=null,details=[],restore=[];
+var openHostId=null,details=[],tasks=[],dialogFilter=null,wsDialog=null,taskSeq=1;
 var ctxBox=$("#ctx"),toastBox=$("#toast"),toastTimer=null;
 
 function toast(msg){toastBox.textContent=msg;toastBox.hidden=false;
  if(toastTimer)clearTimeout(toastTimer);
- toastTimer=setTimeout(function(){toastBox.hidden=true},2800)}
+ toastTimer=setTimeout(function(){toastBox.hidden=true},3000)}
 function hostById(id){for(var i=0;i<HOSTS.length;i++)if(HOSTS[i].id===id)return HOSTS[i];return null}
 function snapsOfHost(id){return SNAPS[id]||[]}
+function flash(node){if(!node)return;node.classList.remove("flash");void node.offsetWidth;node.classList.add("flash");setTimeout(function(){node.classList.remove("flash")},980)}
 
 function renderArchive(){
  var b=$("#archiveBody");b.innerHTML="";
@@ -263,6 +300,20 @@ function renderArchive(){
 
 function renderWorkspace(){
  var b=$("#workspaceBody");b.innerHTML="";
+ if(wsDialog==="close-host"){
+  var h=hostById(openHostId);
+  var names=details.map(function(d){return d.short||d.title}).join(", ");
+  var d=el("article","dialog");
+  d.innerHTML='<header class="dialog-head"><b>'+h.name+' schließen?</b><button class="host-close" aria-label="Abbrechen">✕</button></header>'
+   +'<div class="dialog-body"><b>'+details.length+' geöffnete Detail-Objekte</b> werden mit geschlossen: '+names+'. Task-Objekte unten bleiben unberührt.</div>'
+   +'<footer class="dialog-foot"><button class="btn primary">Schließen</button><button class="btn">Abbrechen</button></footer>';
+  d.querySelector(".host-close").addEventListener("click",cancelHostDialog);
+  var bs=d.querySelectorAll(".dialog-foot .btn");
+  bs[0].addEventListener("click",function(){confirmHostClose()});
+  bs[1].addEventListener("click",cancelHostDialog);
+  b.appendChild(d);
+  return;
+ }
  if(!openHostId){b.innerHTML='<div class="empty">Host-Objekt aus dem Archiv hier ablegen.<br>Der Host öffnet sich mit Repo · Archives · Config.</div>';return}
  var h=hostById(openHostId);
  var card=el("article","host-object");
@@ -272,6 +323,7 @@ function renderWorkspace(){
   ["archives","▤","Archives",snapsOfHost(h.id).length+" Snapshots"],
   ["config","⚙","Config","Zugriff & Einstellungen"]].forEach(function(k){
   var o=el("div","object");
+  o.setAttribute("data-kid",k[0]);
   o.draggable=true;
   o.innerHTML='<span class="icon">'+k[1]+'</span><span class="object-copy"><span class="object-title">'+k[2]+'</span><span class="object-meta">'+k[3]+'</span></span>';
   o.addEventListener("dragstart",function(e){e.dataTransfer.setData("application/janus-object",k[0]);e.dataTransfer.effectAllowed="copy";o.classList.add("dragging")});
@@ -279,29 +331,77 @@ function renderWorkspace(){
   o.addEventListener("click",function(){openChild(k[0])});
   kids.appendChild(o);
  });
- card.querySelector(".host-close").addEventListener("click",closeHost);
+ card.querySelector(".host-close").addEventListener("click",requestHostClose);
  b.appendChild(card);
 }
 
-function findDetail(kind,key){for(var i=0;i<details.length;i++)if(details[i].kind===kind&&details[i].key===key)return details[i];return null}
-function killDetail(e){(e.timers||[]).forEach(function(t){clearTimeout(t)});var i=details.indexOf(e);if(i>=0)details.splice(i,1)}
-function closeDetail(e){killDetail(e);renderDetails()}
+function requestHostClose(){
+ if(details.length>0){wsDialog="close-host";renderWorkspace()}
+ else closeHost();
+}
+function cancelHostDialog(){wsDialog=null;renderWorkspace()}
+function confirmHostClose(){closeHost()}
+function closeHost(){
+ var hId=openHostId;
+ details.slice().forEach(killDetail);
+ details=[];
+ openHostId=null;wsDialog=null;dialogFilter=null;
+ renderAll();
+ flash(firstHostNode(hId));
+}
+function firstHostNode(id){
+ var nodes=document.querySelectorAll("#archiveBody .object");
+ for(var i=0;i<nodes.length;i++)if(nodes[i].textContent.indexOf(hostById(id).name)>=0)return nodes[i];
+ return null;
+}
 
+function openHost(id){
+ if(openHostId===id)return;
+ var switched=openHostId!==null&&details.length>0;
+ details.slice().forEach(killDetail);
+ details=[];openHostId=id;wsDialog=null;dialogFilter=null;
+ renderAll();
+ if(switched)toast("Host gewechselt – Details geschlossen.");
+}
 function openChild(kind){
- var h=openHostId;if(!h)return;
- if(kind==="repo")openDetail("repo","repo:"+h,"Repo · "+h,true,{});
- else if(kind==="archives")openDetail("archives","arch:"+h,"Archives · "+h,false,{});
- else if(kind==="config")openDetail("config","cfg:"+h,"Repo-Config · "+h,false,{});
+ var h=openHostId;if(!h||wsDialog)return;
+ if(kind==="repo")openDetail("repo","repo:"+h,"Repo · "+h,"Repo",true,{});
+ else if(kind==="archives")openDetail("archives","arch:"+h,"Archives · "+h,"Archives",false,{});
+ else if(kind==="config")openDetail("config","cfg:"+h,"Repo-Config · "+h,"Config",false,{});
 }
 function openSnap(snapId){
  var s=null;
- Object.keys(SNAPS).forEach(function(hid){SNAPS[hid].forEach(function(x){if(x.id===snapId)s=x})});
+ snapsOfHost(openHostId).forEach(function(x){if(x.id===snapId)s=x});
  if(!s)return;
- openDetail("snapshot","snap:"+snapId,"Snapshot · "+snapId,true,{snap:snapId});
+ openDetail("snapshot","snap:"+snapId,"Snapshot · "+s.name,"Snapshot",true,{snap:snapId});
 }
-function openDetail(kind,key,title,withLoad,extra){
+function findDetail(kind,key){for(var i=0;i<details.length;i++)if(details[i].kind===kind&&details[i].key===key)return details[i];return null}
+function killDetail(e){(e.timers||[]).forEach(function(t){clearTimeout(t)});var i=details.indexOf(e);if(i>=0)details.splice(i,1)}
+function closeDetail(e){
+ killDetail(e);
+ var p=parentNodeOf(e);
+ renderDetails();
+ flash(p);
+}
+function parentNodeOf(e){
+ if(e.kind==="repo")return $("#workspaceBody .object[data-kid=repo]");
+ if(e.kind==="archives")return $("#workspaceBody .object[data-kid=archives]");
+ if(e.kind==="config")return $("#workspaceBody .object[data-kid=config]");
+ if(e.kind==="snapshot")return $("#workspaceBody .object[data-kid=archives]");
+ if(e.kind==="history"){
+  var n=detailNode(e.parentKey);
+  return n||$("#workspaceBody .object[data-kid=repo]");
+ }
+ return null;
+}
+function detailNode(key){
+ var nodes=document.querySelectorAll("#detailStack .panel");
+ for(var i=0;i<nodes.length;i++)if(nodes[i].getAttribute("data-key")===key)return nodes[i];
+ return null;
+}
+function openDetail(kind,key,title,short,withLoad,extra){
  if(findDetail(kind,key))return;
- var e={kind:kind,key:key,title:title,loading:!!withLoad,
+ var e={kind:kind,key:key,title:title,short:short,loading:!!withLoad,
   filter:{on:false,q:""},marks:new Set(),selected:null,rows:[],
   expanded:new Set(["/etc","/home","/home/dr.raus","/var","/var/log"]),
   extra:extra||{}};
@@ -319,38 +419,64 @@ function startLoad(e){
 }
 function cancelLoad(e){killDetail(e);renderDetails();toast("Ladevorgang abgebrochen – Detail geschlossen.")}
 
-function openHost(id){
- if(openHostId===id)return;
- var switched=openHostId!==null&&details.length>0;
- details.slice().forEach(killDetail);
- details=[];
- openHostId=id;
- renderAll();
- if(switched)toast("Host gewechselt – Details geschlossen.");
-}
-function closeHost(){
- details.slice().forEach(killDetail);
- details=[];
- openHostId=null;
- renderAll();
-}
-
 function renderDetails(){
  var st=$("#detailStack");st.innerHTML="";
- if(!details.length){st.innerHTML='<div class="empty">Geöffnete Objekte erscheinen hier als Panels.<br>Anordnung automatisch – nebeneinander oder untereinander.</div>';return}
+ if(!details.length&&!dialogFilter){st.innerHTML='<div class="empty">Geöffnete Objekte erscheinen hier als Panels.<br>Anordnung automatisch – nebeneinander oder untereinander.</div>';return}
+ if(dialogFilter){
+  var dp=el("article","panel dialog");
+  dp.setAttribute("data-key","filter");
+  dp.innerHTML='<header class="panel-head"><span class="panel-name">Filter-Objekt · '+dialogFilter.from+'</span><button class="panel-close" aria-label="Dialog schließen">✕</button></header><div class="panel-body"></div>';
+  dp.querySelector(".panel-close").addEventListener("click",closeFilterDialog);
+  buildFilterDialog(dp.querySelector(".panel-body"));
+  st.appendChild(dp);
+ }
  details.forEach(function(e){
-  var p=el("article","panel detail");
+  var min=!!dialogFilter;
+  var p=el("article","panel detail"+(min?" min":""));
+  p.setAttribute("data-key",e.key);
   var head=el("header","panel-head");
-  head.innerHTML='<span class="panel-name">'+e.title+'</span>';
+  head.innerHTML='<span class="panel-name">'+(min?e.short+" · minimiert":e.title)+'</span>';
   var x=el("button","panel-close");x.textContent="✕";x.setAttribute("aria-label","Panel schließen");
   x.addEventListener("click",function(){closeDetail(e)});
   head.appendChild(x);
   p.appendChild(head);
   var body=el("div","panel-body");p.appendChild(body);
-  buildBody(e,body);
+  if(!min)buildBody(e,body);
   st.appendChild(p);
  });
 }
+function buildFilterDialog(body){
+ body.innerHTML="";
+ var f1=el("div","fld");f1.innerHTML='<label>Muster</label>';
+ var i1=el("input");i1.type="text";i1.value=dialogFilter.pattern;f1.appendChild(i1);
+ var f2=el("div","fld");f2.innerHTML='<label>Mindestgröße</label>';
+ var i2=el("input");i2.type="text";i2.value=dialogFilter.minSize;f2.appendChild(i2);
+ var note=el("p","t-note");note.textContent="Commit erzeugt ein neues Task-Objekt unten – dieses Repo-Panel bleibt geöffnet.";
+ var foot=el("footer","dialog-foot");
+ var b1=el("button","btn primary");b1.textContent="Als Task committen";
+ var b2=el("button","btn");b2.textContent="Abbrechen";
+ b1.addEventListener("click",function(){
+  commitFilterTask(i1.value.trim()||"*",i2.value.trim()||"0 B");
+ });
+ b2.addEventListener("click",closeFilterDialog);
+ foot.appendChild(b1);foot.appendChild(b2);
+ body.appendChild(f1);body.appendChild(f2);body.appendChild(note);body.appendChild(foot);
+}
+function closeFilterDialog(){dialogFilter=null;renderDetails()}
+function commitFilterTask(pattern,minSize){
+ var t={id:"t"+(taskSeq++),type:"restore",state:"draft",filtered:true,
+  pattern:pattern,minSize:minSize,hits:214};
+ tasks.push(t);
+ dialogFilter=null;
+ renderTasks();
+ toast("Neues Task-Objekt entstanden – das Repo-Panel bleibt geöffnet.");
+}
+function openFilterDialog(){
+ if(dialogFilter)return;
+ dialogFilter={from:openHostId||"Repo",pattern:"*.log",minSize:"10 MB"};
+ renderDetails();
+}
+
 function buildBody(e,body){
  body.innerHTML="";
  if(e.loading){
@@ -383,9 +509,24 @@ function buildArchives(body){
   body.appendChild(o);
  });
 }
+function leafSpec(e,n){
+ return e.kind==="repo"?("v"+n.v+" · aktuell"):e.extra.snap;
+}
 function buildTreeBody(e,body){
  var withV=e.kind==="repo";
- var data=withV?REPO_TREE:SNAP_TREE;
+ if(e.kind==="snapshot"){
+  var bar=el("div","objbar");
+  [["Filter",function(){e.filter.on=!e.filter.on;e.filter.q="";renderDetails()}],
+   ["Markieren",function(){needSel(e,function(n){if(e.marks.has(n.name))e.marks.delete(n.name);else e.marks.add(n.name);renderDetails()})}],
+   ["Restore vormerken",function(){needSel(e,function(n){addRestore(n.name,leafSpec(e,n))})}],
+   ["Historie",function(){needSel(e,function(n){openHistory(n,e)})}],
+   ["Aufklappen",function(){expandAll(e)}]].forEach(function(b){
+   var btn=el("button","mini");btn.textContent=b[0];
+   btn.addEventListener("click",b[1]);
+   bar.appendChild(btn);
+  });
+  body.appendChild(bar);
+ }
  if(e.filter.on){
   var f=el("div","filter-bar");
   var inp=el("input");inp.type="text";inp.placeholder="Filtern (Name enthält …)";inp.value=e.filter.q;
@@ -395,24 +536,44 @@ function buildTreeBody(e,body){
   f.appendChild(inp);f.appendChild(off);body.appendChild(f);
  }
  e.rows=[];
- var t=el("div","tree");
- walkTree(t,data.dirs,0,"",e,withV);
+ var t=el("div","xtree");
+ buildNodes(t,(withV?REPO_TREE:SNAP_TREE).dirs,"",e,withV);
  body.appendChild(t);
  if(e.filter.q)applyFilter(e);
 }
-function walkTree(t,nodes,depth,prefix,e,withV){
+function needSel(e,fn){
+ if(!e.selected){toast("Zuerst ein Blatt auswählen.");return}
+ for(var i=0;i<e.rows.length;i++)if(e.rows[i].node.name===e.selected)return fn(e.rows[i].node);
+ toast("Zuerst ein Blatt auswählen.");
+}
+function expandAll(e){
+ function mark(nodes,pre){nodes.forEach(function(n){var p=pre+"/"+n.name;if(n.kids){e.expanded.add(p);mark(n.kids,p)}})}
+ mark((e.kind==="repo"?REPO_TREE:SNAP_TREE).dirs,"");
+ renderDetails();
+}
+function buildNodes(parent,nodes,prefix,e,withV){
  nodes.forEach(function(n){
   var path=prefix+"/"+n.name;
-  var row=el("div","row "+(n.kids?"dir":"leaf"));
-  row.style.paddingLeft=(6+depth*13)+"px";
   if(n.kids){
    var exp=e.expanded.has(path);
-   row.innerHTML='<span class="tw">'+(exp?"▾":"▸")+'</span><span class="tn">'+n.name+'</span><span class="mark-dot"></span>';
+   var row=el("div","xrow dir");
+   row.innerHTML='<span class="xtw">'+(exp?"−":"+")+'</span><span class="xname">'+n.name+'</span><span class="xmeta"></span><span class="xdot"></span>';
+   if(e.marks.has(n.name))row.classList.add("marked");
    row.addEventListener("click",function(){if(e.expanded.has(path))e.expanded.delete(path);else e.expanded.add(path);renderDetails()});
    row.addEventListener("contextmenu",function(ev){ev.preventDefault();dirCtx(ev,e)});
+   e.rows.push({row:row,node:n});
+   parent.appendChild(row);
+   if(exp){
+    var sub=el("div","xsub");
+    buildNodes(sub,n.kids,path,e,withV);
+    parent.appendChild(sub);
+   }
   }else{
-   var pinned=restore.some(function(r){return r.label===n.name});
-   row.innerHTML='<span class="tw">·</span><span class="tn">'+n.name+'</span><span class="meta">'+n.size+" · "+n.mtime+'</span>'+(withV&&n.v>1?'<span class="badge" title="Anzahl Versionen im Repo-Baum">v'+n.v+'</span>':"")+'<span class="pinmark">⟲</span><span class="mark-dot"></span>';
+   var row=el("div","xrow leaf");
+   var pinned=isPinned(n.name);
+   row.innerHTML='<span class="xtw"></span><span class="xname">'+n.name+'</span><span class="xmeta">'+n.size+" · "+n.mtime+'</span>'
+    +(withV&&n.v>1?'<span class="badge" title="Anzahl Versionen im gemergten Baum">v'+n.v+'</span>':"")
+    +'<span class="xpin">⟲</span><span class="xdot"></span>';
    if(e.marks.has(n.name))row.classList.add("marked");
    if(pinned)row.classList.add("pinned");
    if(e.selected===n.name)row.classList.add("selected");
@@ -420,15 +581,13 @@ function walkTree(t,nodes,depth,prefix,e,withV){
    row.addEventListener("click",function(){e.selected=n.name;renderDetails()});
    row.addEventListener("contextmenu",function(ev){ev.preventDefault();leafCtx(ev,e,n,row,withV)});
    row.addEventListener("dragstart",function(ev){
-    var spec=withV?"aktuelle Version":e.extra.snap;
-    ev.dataTransfer.setData("application/janus-leaf",JSON.stringify({name:n.name,spec:spec}));
+    ev.dataTransfer.setData("application/janus-leaf",JSON.stringify({name:n.name,spec:leafSpec(e,n)}));
     ev.dataTransfer.effectAllowed="copy";row.classList.add("dragging");
    });
    row.addEventListener("dragend",function(){row.classList.remove("dragging")});
+   e.rows.push({row:row,node:n});
+   parent.appendChild(row);
   }
-  e.rows.push({row:row,node:n});
-  t.appendChild(row);
-  if(n.kids&&e.expanded.has(path))walkTree(t,n.kids,depth+1,path,e,withV);
  });
 }
 function nodeMatches(n,q){
@@ -445,10 +604,10 @@ function leafCtx(ev,e,n,row,withV){
   {l:"Filter ein-/ausblenden",f:function(){e.filter.on=!e.filter.on;e.filter.q="";hideCtx();renderDetails()}},
   {l:"Markieren",f:function(){if(e.marks.has(n.name))e.marks.delete(n.name);else e.marks.add(n.name);hideCtx();renderDetails()}},
   {sep:true},
-  {l:"Restore vormerken",f:function(){hideCtx();addRestore(n.name,withV?"aktuelle Version":e.extra.snap)}}
+  {l:"Restore vormerken",f:function(){hideCtx();addRestore(n.name,leafSpec(e,n))}}
  ];
- if(withV)items.push({l:"Historie anzeigen",f:function(){hideCtx();openHistory(n,e)}});
- else items.push({l:"Historie anzeigen",f:function(){hideCtx();toast("Snapshot-Baum zeigt einen Zeitpunkt – Historie liegt im Repo-Baum.")}});
+ if(withV)items.push({l:"Filter-Objekt …",f:function(){hideCtx();openFilterDialog()}});
+ items.push({l:"Historie anzeigen",f:function(){hideCtx();openHistory(n,e)}});
  showCtx(ev,items);
 }
 function dirCtx(ev,e){
@@ -458,44 +617,144 @@ function dirCtx(ev,e){
  ]);
 }
 function openHistory(n,e){
- if(!n.v||n.v<2){toast("Dieses Objekt hat nur eine Version – die Historie ist trivial.");return}
- openDetail("history","hist:"+n.name,"Historie · "+n.name,false,{leaf:n});
-}
-function buildHistory(e,body){
- var n=e.extra.leaf;
  var list=HIST[n.name];
  if(!list){
   list=[];var snaps=snapsOfHost(openHostId);
-  for(var i=0;i<Math.min(n.v,snaps.length);i++)list.push({v:"v"+(n.v-i),arch:snaps[i].id,when:snaps[i].when,size:n.size});
+  for(var i=0;i<Math.min(2,snaps.length);i++)list.push({v:"v"+(i+1),arch:snaps[i].id,when:snaps[i].when,size:n.size});
  }
- list.forEach(function(r){
-  var row=el("div","row leaf");
-  row.innerHTML='<span class="badge">'+r.v+'</span><span class="tn">'+r.arch+'</span><span class="meta">'+r.when+" · "+r.size+'</span>';
+ if(!n.v||n.v<2){toast("Dieses Objekt hat nur eine Version – die Historie ist trivial.");return}
+ openDetail("history","hist:"+n.name,"Historie · "+n.name,"Historie",false,{leaf:n,list:list,parentKey:e.key});
+}
+function buildHistory(e,body){
+ (e.extra.list||[]).forEach(function(r){
+  var row=el("div","hrow");
+  row.innerHTML='<span class="badge">'+r.v+'</span><span class="xname">'+r.arch+'</span><span class="xmeta">'+r.when+" · "+r.size+'</span>';
   var pin=el("button","mini");pin.textContent="Diese Version vormerken";
-  pin.addEventListener("click",function(){addRestore(n.name,r.v+" · "+r.arch)});
+  pin.addEventListener("click",function(){addRestore(e.extra.leaf.name,r.v+" · "+r.arch)});
   row.appendChild(pin);
   body.appendChild(row);
  });
 }
+function isPinned(name){
+ return tasks.some(function(t){return t.type==="restore"&&t.state==="draft"&&!t.filtered&&t.items.some(function(i){return i.label===name})});
+}
 function addRestore(label,spec){
- if(restore.some(function(r){return r.label===label&&r.spec===spec})){toast("Bereits vorgemerkt: "+label+" · "+spec);return}
- restore.push({label:label,spec:spec});
- renderDock();renderDetails();
+ var t=null;
+ for(var i=0;i<tasks.length;i++)if(tasks[i].type==="restore"&&tasks[i].state==="draft"&&!tasks[i].filtered){t=tasks[i];break}
+ if(!t){t={id:"t"+(taskSeq++),type:"restore",state:"draft",items:[]};tasks.push(t)}
+ if(t.items.some(function(x){return x.label===label&&x.spec===spec})){toast("Bereits vorgemerkt: "+label+" · "+spec);return}
+ t.items.push({label:label,spec:spec});
+ renderTasks();renderDetails();
+ toast("Vorgemerkt: "+label+" · "+spec+" – Task-Entwurf unten erweitert.");
 }
-function renderDock(){
- var d=$("#dock");
- if(!restore.length){d.hidden=true;return}
- d.hidden=false;
- $("#dockCount").textContent=restore.length+(restore.length===1?" Objekt":" Objekte");
- var items=$("#dockItems");items.innerHTML="";
- restore.forEach(function(r,i){
-  var c=el("span","chip");
-  c.innerHTML='<b>'+r.label+'</b><span>'+r.spec+'</span><span aria-hidden="true">✕</span>';
-  c.title="Klicken entfernt dieses Objekt aus dem Job";
-  c.addEventListener("click",function(){restore.splice(i,1);renderDock();renderDetails()});
-  items.appendChild(c);
- });
+
+function renderTasks(){
+ var row=$("#taskRow");row.innerHTML="";
+ if(!tasks.length){
+  var p=el("p","t-note");
+  p.textContent="Noch keine Tasks – Vormerken im Baum erzeugt ein Restore-Objekt.";
+  row.appendChild(p);
+  return;
+ }
+ tasks.forEach(function(t){row.appendChild(taskCard(t))});
 }
+function taskCard(t){
+ var c=el("article","task"+(t.state==="done"?" t-done":""));
+ var head=el("header","t-head");
+ var stateTxt={draft:"Entwurf",running:"läuft",done:"fertig",cancelled:"abgebrochen"}[t.state];
+ head.innerHTML='<span class="icon">'+(t.type==="restore"?"⟲":t.type==="check"?"✓":"⊘")+'</span>'
+  +'<span class="t-copy"><b>'+(t.type==="restore"?"Restore":t.type==="check"?"Check":"Prune")+'</b><span>'+stateTxt+'</span></span>'
+  +'<span class="pill">'+stateTxt+'</span>';
+ c.appendChild(head);
+ var body=el("div","t-body");c.appendChild(body);
+ if(t.state==="draft"&&!t.filtered){
+  var chips=el("div","chips");
+  t.items.forEach(function(it,i){
+   var ch=el("span","chip");
+   ch.innerHTML='<b>'+it.label+'</b><span>'+it.spec+'</span><span aria-hidden="true">✕</span>';
+   ch.title="Klicken entfernt dieses Objekt aus dem Task";
+   ch.addEventListener("click",function(){t.items.splice(i,1);if(!t.items.length)removeTask(t);renderTasks();renderDetails()});
+   chips.appendChild(ch);
+  });
+  if(!t.items.length)body.innerHTML='<span class="t-note">Leer – Blätter vormerken oder hierher ziehen.</span>';
+  else body.appendChild(chips);
+ }else if(t.state==="draft"&&t.filtered){
+  var chips=el("div","chips");
+  [["Muster",t.pattern],["Ab",t.minSize],["Treffer",t.hits+" Objekte"]].forEach(function(p){
+   var ch=el("span","chip hit");ch.innerHTML='<b>'+p[0]+'</b><span>'+p[1]+'</span>';
+   chips.appendChild(ch);
+  });
+  body.appendChild(chips);
+ }else if(t.state==="running"){
+  body.innerHTML='<div class="t-note">'+t.phase+'</div>'
+   +'<div class="progress"><i style="width:'+t.pct+'%"></i></div>'
+   +'<div class="t-meta"><span>'+t.pct+' %</span><span>'+t.eta+'</span></div>';
+ }else if(t.state==="done"){
+  body.innerHTML='<div class="t-note">'+t.summary+'</div>'
+   +'<div class="t-meta"><span>'+(t.when||"")+'</span><span>'+(t.type==="prune"?"2 Archive entfernt":"abgeschlossen")+'</span></div>';
+ }else if(t.state==="cancelled"){
+  body.innerHTML='<div class="t-note">'+t.note+'</div>';
+ }
+ var act=el("footer","t-actions");c.appendChild(act);
+ if(t.state==="draft"){
+  var b1=el("button","btn primary");b1.textContent="Als Task committen";
+  var b2=el("button","btn");b2.textContent="Verwerfen";
+  b1.addEventListener("click",function(){commitTask(t)});
+  b2.addEventListener("click",function(){removeTask(t);renderTasks();toast("Task-Objekt verworfen.")});
+  act.appendChild(b1);act.appendChild(b2);
+ }else if(t.state==="running"){
+  var bc=el("button","btn");bc.textContent="Abbrechen";
+  bc.addEventListener("click",function(){cancelTask(t)});
+  act.appendChild(bc);
+ }else if(t.state==="done"){
+  var br=el("button","btn");br.textContent="Bericht";
+  br.addEventListener("click",function(){toast("Bericht: Mockup – Detail-Ansicht folgt in der Implementierung.")});
+  act.appendChild(br);
+ }else{
+  var bx=el("button","btn");bx.textContent="Verwerfen";
+  bx.addEventListener("click",function(){removeTask(t);renderTasks()});
+  act.appendChild(bx);
+ }
+ return c;
+}
+function removeTask(t){
+ (t.timers||[]).forEach(function(x){clearTimeout(x)});
+ var i=tasks.indexOf(t);if(i>=0)tasks.splice(i,1);
+}
+function commitTask(t){
+ if(t.state!=="draft")return;
+ if(!t.filtered&&!t.items.length){toast("Entwurf ist leer – zuerst Blätter vormerken.");return}
+ t.state="running";t.pct=4;t.tick=0;
+ t.phase=t.filtered?("Extrahiere "+t.hits+" gefilterte Objekte …"):RESTORE_PHASES[0];
+ t.eta="Rest geschätzt …";
+ t.timers=[];
+ var step=function(){
+  t.tick++;
+  t.pct=Math.min(100,t.pct+7+Math.floor(Math.random()*6));
+  if(!t.filtered)t.phase=RESTORE_PHASES[Math.min(RESTORE_PHASES.length-1,Math.floor(t.pct/26))];
+  var rem=Math.max(0,Math.round((100-t.pct)*0.12));
+  t.eta=(rem>0?("Rest geschätzt ~0:"+String(rem).padStart(2,"0")+" min"):"gleich fertig");
+  if(t.pct>=100){
+   t.state="done";
+   t.summary=t.filtered?(t.hits+" Objekte nach /tmp/janus-restore wiederhergestellt"):(t.items.length+" Objekte nach /tmp/janus-restore wiederhergestellt");
+   toast("Restore abgeschlossen – Ergebnis im Task-Objekt.");
+  }
+  renderTasks();
+  if(t.state==="running")t.timers.push(setTimeout(step,650));
+ };
+ t.timers.push(setTimeout(step,500));
+ renderTasks();
+ toast("Task committet – das auslösende Panel bleibt geöffnet.");
+}
+function cancelTask(t){
+ (t.timers||[]).forEach(function(x){clearTimeout(x)});
+ t.timers=[];
+ t.state="cancelled";
+ t.note="Abgebrochen bei "+t.pct+" % – bereits extrahierte Objekte bleiben im Ziel.";
+ renderTasks();
+ toast("Task abgebrochen – sauberer Abbruch gemäß Vertrag.");
+}
+
 function showCtx(ev,items){
  ctxBox.innerHTML="";
  items.forEach(function(it){
@@ -522,25 +781,40 @@ function zoneDrop(zone,mime,handler){
 zoneDrop($("#workspaceZone"),"application/janus-host",function(id){if(hostById(id))openHost(id)});
 zoneDrop($("#detailsZone"),"application/janus-object",openChild);
 zoneDrop($("#detailsZone"),"application/janus-snapshot",openSnap);
-
-var dock=$("#dock");
-dock.addEventListener("dragover",function(ev){if(hasType(ev.dataTransfer,"application/janus-leaf")){ev.preventDefault();ev.dataTransfer.dropEffect="copy";dock.classList.add("drop-target")}});
-dock.addEventListener("dragleave",function(){dock.classList.remove("drop-target")});
-dock.addEventListener("drop",function(ev){
+var tp=$("#taskPane");
+tp.addEventListener("dragover",function(ev){if(hasType(ev.dataTransfer,"application/janus-leaf")){ev.preventDefault();ev.dataTransfer.dropEffect="copy";tp.classList.add("drop-target")}});
+tp.addEventListener("dragleave",function(){tp.classList.remove("drop-target")});
+tp.addEventListener("drop",function(ev){
  if(hasType(ev.dataTransfer,"application/janus-leaf")){
-  ev.preventDefault();dock.classList.remove("drop-target");
+  ev.preventDefault();tp.classList.remove("drop-target");
   var d;try{d=JSON.parse(ev.dataTransfer.getData("application/janus-leaf"))}catch(x){return}
   if(d&&d.name)addRestore(d.name,d.spec||"aktuelle Version");
  }
 });
-$("#dockClear").addEventListener("click",function(){restore=[];renderDock();renderDetails()});
-$("#dockRun").addEventListener("click",function(){toast("Mockup: Ausführung, Fortschritt und Cancel-Streaming gehören zur Implementierung.")});
 
 function renderAll(){
- renderArchive();renderWorkspace();renderDetails();renderDock();
+ renderArchive();renderWorkspace();renderDetails();renderTasks();
  $("#workbench").classList.toggle("has-host",!!openHostId);
 }
-renderAll();
+function seed(){
+ openHostId="atlas";
+ openDetail("repo","repo:atlas","Repo · atlas","Repo",false,{});
+ openDetail("snapshot","snap:atlas-2026-10-02","Snapshot · atlas-2026-10-02 02:30","Snapshot",false,{snap:"atlas-2026-10-02"});
+ var leaf=null;
+ (function find(nodes){nodes.forEach(function(n){if(n.name==="diss.pdf")leaf=n;if(n.kids)find(n.kids)})})(REPO_TREE.dirs);
+ openDetail("history","hist:diss.pdf","Historie · diss.pdf","Historie",false,{leaf:leaf||{name:"diss.pdf",v:3,size:"4,2 MB"},list:HIST["diss.pdf"],parentKey:"repo:atlas"});
+ var draft={id:"t"+(taskSeq++),type:"restore",state:"draft",items:[
+  {label:"diss.pdf",spec:"v3 · aktuell"},
+  {label:"notizen.txt",spec:"v5 · aktuell"}
+ ]};
+ var check={id:"t"+(taskSeq++),type:"check",state:"running",pct:41,
+  phase:"Segment 12 von 29 prüfen …",eta:"läuft seit 1:12 min · Rest geschätzt 1:40 min"};
+ var prune={id:"t"+(taskSeq++),type:"prune",state:"done",
+  summary:"2 Archive entfernt · 1,1 GB freigegeben",when:"vor 3 Tagen"};
+ tasks=[draft,check,prune];
+ renderAll();
+}
+seed();
 })();
 </script>
 </body>
