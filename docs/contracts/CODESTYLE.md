@@ -1,16 +1,40 @@
 # Ianus – Code-Style-Vertrag
 
-Version: 0.1.0
-Status: ENTWURF – freigabepflichtig
+Version: 0.1.5
+Status: FREIGEGEBEN
 
 ## 1. C-Backend
 
 ### 1.1 Sprache & Standard
-- C17 (`-std=c17`), POSIX.1-2008.
-- Compiler: GCC >= 12 oder Clang >= 15.
+
+- C99 (`-std=c99`), POSIX.1-2008; keine GNU-Erweiterungen im Kerncode.
+- Compiler: GCC oder Clang mit C99-Unterstützung.
 - Warnungen: `-Wall -Wextra -Wpedantic -Werror` in CI.
 
-### 1.2 Namenskonventionen
+### 1.2 Dispatch und Effizienz
+
+- Für Auswahl nach Operations-/Task-Typen tabellengesteuertes Dispatch bevorzugen;
+  lange `if`-/`else if`-Ketten vermeiden.
+- Kontrollfluss bleibt explizit: Tabellen nur einsetzen, wenn sie ihn vereinfachen,
+  nicht für triviale oder semantisch unterschiedliche Fälle.
+- Effizienz, Code-Wiederverwendung und geringer RSS-Verbrauch sind Entwurfsziele.
+- Speicherbedarf begrenzen: große Borg-Ausgaben streamen und in begrenzten Batches
+  verarbeiten; unnötige Kopien, dauerhaft gehaltene Daten und große Zwischenobjekte
+  vermeiden.
+- Keine Abstraktion ohne konkreten Bedarf. Gemeinsame Logik wiederverwenden,
+  ohne zusätzliche Indirektion oder Laufzeitkosten ohne messbaren Nutzen einzuführen.
+- Performance- und Speicheroptimierungen anhand reproduzierbarer Messungen
+  validieren; keine Komplexität für hypothetische Engpässe hinzufügen.
+- Store-Zugriff zentral über die **eine** kanonische Store API; keine
+  Subsystem-APIs oder Bypässe.
+- C-JSON-Parsing für große Borg-Ausgaben streamend; keine ganze große
+  Borg-Antwort als DOM im Speicher halten.
+- Cache begrenzt, mit explizitem Eigentum und Ref-Count-Leases.
+- Debug-Logs speichern niemals Payloads oder Secrets.
+
+### 1.3 Namenskonventionen
+
+- Bezeichner beginnen niemals mit einem Unterstrich; reservierte C-Bezeichner bleiben unangetastet.
 - Funktionen: `ianus_<modul>_<verb>()` → `ianus_db_open()`, `ianus_repo_index()`.
 - Typen: `ianus_<name>_t` → `ianus_repo_t`, `ianus_job_state_t`.
 - Enums: `IANUS_<MODUL>_<WERT>` → `IANUS_JOB_RUNNING`.
@@ -18,24 +42,33 @@ Status: ENTWURF – freigabepflichtig
 - Lokale Variablen: snake_case, keine Präfixe.
 - Struct-Felder: snake_case.
 
-### 1.3 Formatierung
-- Einrückung: 4 Spaces, keine Tabs.
-- Zeilenlänge: max. 100 Zeichen (weiche Grenze), 120 (harte Grenze).
+### 1.4 Formatierung
+
+- Einrückung ausschließlich mit Tabs; Tabstopps sind 3 Spalten breit.
 - Klammerstil: K&R (öffnende Klammer auf derselben Zeile).
+- Handgeschriebene Quellcodedateien dürfen höchstens 1000 Zeichen enthalten,
+  einschließlich Leerraum und Kommentaren. Bei drohender Überschreitung wird der
+  Code automatisch entlang semantisch zusammengehöriger Verantwortlichkeiten auf
+  mehrere Dateien mit passenden Namen aufgeteilt oder refaktoriert. Die Aufteilung
+  darf keine unnötigen Abstraktionen oder künstliche Fragmentierung erzeugen.
+  Generierte und vendorte Dateien sind ausgenommen.
 - clang-format-Konfiguration wird im Repo hinterlegt.
 
-### 1.4 Speicherverwaltung
+### 1.5 Speicherverwaltung
+
 - Jede Allokation hat genau einen dokumentierten Eigentümer.
-- `_create()` erzeugt, `_destroy()` gibt frei – symmetrisch.
+- `ianus_<modul>_create()` erzeugt, `ianus_<modul>_destroy()` gibt frei – symmetrisch.
 - Rückgabewert bei Fehlern: `NULL` oder negativer int, kein `errno`-Overloading.
 - Keine globalen Variablen außer read-only Konfiguration.
 
-### 1.5 Fehlerbehandlung
+### 1.6 Fehlerbehandlung
+
 - Funktionen geben `int` (0 = Erfolg, < 0 = Fehler) oder `NULL`-Pointer zurück.
 - Fehlercodes als `IANUS_ERR_*`-Enums.
 - Logging über `ianus_log(level, fmt, ...)` mit sd-journal-Anbindung.
 
-### 1.6 Dokumentation
+### 1.7 Dokumentation
+
 - Jede öffentliche Funktion hat einen Doxygen-Kommentar über der Deklaration.
 - Jede Datei hat einen SPDX-License-Identifier-Header.
 

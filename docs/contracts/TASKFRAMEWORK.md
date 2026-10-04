@@ -1,7 +1,7 @@
 # Ianus – Task-Framework-Vertrag
 
-Version: 0.1.0
-Status: ENTWURF – freigabepflichtig
+Version: 0.1.1
+Status: FREIGEGEBEN
 
 ## 1. Prinzip
 
@@ -19,16 +19,38 @@ stateDiagram-v2
     Warteschlange --> Laeuft: Runner nimmt auf\n(execute() + progress-Callback)
     Laeuft --> Fertig
     Laeuft --> Fehlgeschlagen
-    Entwurf --> Abgebrochen: cancel()
-    Validiert --> Abgebrochen: cancel()
-    Warteschlange --> Abgebrochen: cancel()
-    Laeuft --> Abgebrochen: cancel()
+    Entwurf --> AbbruchAngefordert: cancel()
+    Validiert --> AbbruchAngefordert: cancel()
+    Warteschlange --> AbbruchAngefordert: cancel()
+    Laeuft --> AbbruchAngefordert: cancel()
+    AbbruchAngefordert --> Abgebrochen: Arbeit tatsächlich beendet
+    AbbruchAngefordert --> Fertig: Arbeit beendet vor Abbruch
+    AbbruchAngefordert --> Fehlgeschlagen: Fehler vor Abbruch
     Fertig --> [*]
     Fehlgeschlagen --> [*]
     Abgebrochen --> [*]
 ```
 
-Zusätzlich: `cancel()` kann aus jedem aktiven Zustand aufgerufen werden.
+Zusätzlich: `cancel()` kann aus jedem aktiven Zustand aufgerufen werden. Der
+Zwischenzustand `AbbruchAngefordert` bleibt aktiv, bis die Arbeit tatsächlich
+beendet ist.
+
+**Abbruch-Semantik:**
+
+- `cancel()` ist eine **Abbruchanforderung**, kein sofortiger Zustandswechsel.
+  `Abgebrochen` wird erst gesetzt, wenn die Arbeit tatsächlich beendet ist;
+  solange der Abbruch läuft, bleibt der Task aktiv (UI: `Abbruch angefordert`).
+- Der Runner leitet die Anforderung an das Backend weiter und bricht ab, wo
+  unterstützt: DB-Backend-Abfragen per Query-Cancel (Cursor/Ressourcen werden
+  freigegeben), Borg-Subprozesse über ein definiertes Cancel-Design (Signal,
+  begrenzte Wartezeit, anschließendes Reap des Kindprozesses).
+- Kritische Abschnitte ohne sicheren Stopp (Safe Stop Boundary) werden als nicht
+  abbrechbar ausgewiesen; die Anforderung wird am nächsten sicheren Stopp-Punkt
+  umgesetzt.
+- Die Repo-Integrität bleibt gewahrt. Teileffekte/Teilergebnisse werden stets
+  offengelegt und nie als vollständig präsentiert.
+- Solange noch Arbeit ausgeführt wird, wird der Task nicht als `Abgebrochen`
+  markiert.
 
 ## 3. Task-Registry
 
@@ -103,6 +125,16 @@ typedef void (*ianus_progress_cb)(const ianus_progress_t *progress, void *userda
 ```
 
 Der Daemon sendet Fortschritt über WebSocket an verbundene Clients.
+
+**Fortschrittsstufen und Indikatoren:**
+
+- Fortschritt ist strukturiert: bekannte Gesamtmenge, erledigte Zähler
+  (Dateien/Bytes/Items) und verstrichene Zeit. Eine ETA wird nur angegeben, wenn
+  sie aus gemessener Arbeit ableitbar ist; bei unbekannter Gesamtmenge bleibt der
+  Fortschritt unbestimmt (indeterminate).
+- Auch wenn Borg schweigt, meldet der Task die aktuelle Phase und bearbeitete
+  Arbeitselemente/Zähler. Granulare Borg-Fortschrittsdaten werden nicht erfunden,
+  wenn sie nicht verfügbar sind.
 
 ## 7. Berechtigungen
 

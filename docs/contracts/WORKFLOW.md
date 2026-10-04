@@ -1,7 +1,7 @@
 # Ianus – UX-Workflow-Vertrag
 
-Version: 0.1.0
-Status: ENTWURF – freigabepflichtig
+Version: 0.1.3
+Status: FREIGEGEBEN
 
 ## 1. Zentrale Metapher
 
@@ -26,24 +26,37 @@ flowchart TB
     Toolbar --> Hauptbereich --> Status
 ```
 
+Die Position des Job-Docks ist vom Benutzer wählbar: rechts neben dem
+Inhaltsbereich oder als Panel unten. Die Wahl ist jederzeit umschaltbar und wird
+benutzerbezogen gespeichert. Auf dem Desktop stehen beide Optionen zur
+Verfügung; auf Tablets ist unten die bevorzugte Variante, die Wahl bleibt aber
+möglich, soweit Platz und Bedienbarkeit gewährleistet sind.
+
 ## 3. Interaktionen
 
 ### 3.1 Waldbaum-Navigation
 - Baumknoten expandieren per Klick.
 - Lazy-Loading: Kinder werden bei Expansion via API geladen.
 - Suchfeld filtert den gesamten Baum (serverseitig, mit Debounce).
+- Der Baum zeigt nur die vollständig veröffentlichte aktuelle Generation je
+  Repository.
 
 ### 3.2 Rechtsklick → Kontextmenü
 Auf jedes Objekt (Datei oder Verzeichnis):
 - **Historie anzeigen**: Zeigt alle Versionen aus allen Archiven, chronologisch.
-  Jede Version zeigt: Archivname, Datum, Größe, Änderungstyp (neu/geändert/gelöscht).
-- **Zum Restore vormerken**: Fügt die ausgewählte Version dem aktiven Job hinzu.
+  Jede Version zeigt: Archivname, Datum, Größe, Änderungstyp (neu/geändert/gelöscht)
+  sowie den Generation-/Archivkontext.
+- **Zum Restore vormerken**: Pinnt die ausgewählte unveränderliche konkrete
+  Pfadversion inklusive Generation und fügt sie dem aktiven Job hinzu. Neue
+  Indizierung verschiebt die Job-Auswahl dadurch nicht.
 - **Neuen Job erstellen**: Erstellt ein neues leeres Job-Objekt.
 - **Eigenschaften**: Zeigt Metadaten (Rechte, Eigentümer, Größe, Hash).
 
 ### 3.3 Drag & Drop
 - **Datei/Verzeichnis → Job-Dock**: Erstellt neuen Job oder fügt zum aktiven hinzu.
-- **Datei/Verzeichnis → bestehendes Job-Objekt**: Fügt dem Job hinzu.
+  Die ausgewählte konkrete Pfadversion wird inklusive Generation gepinnt.
+- **Datei/Verzeichnis → bestehendes Job-Objekt**: Fügt dem Job hinzu (gepinnte
+  Version).
 - **Job-Objekt → Ausführungszone**: Startet den Job (mit Bestätigungsdialog).
 - **Task-Typ-Karten → Job-Objekt**: Ändert den Task-Typ eines Jobs
   (z. B. von "Restore" zu "Check").
@@ -52,14 +65,40 @@ Auf jedes Objekt (Datei oder Verzeichnis):
 - Zeigt alle offenen Job-Objekte als Karten.
 - Jede Karte zeigt: Typ, Anzahl Objekte, geschätzte Größe.
 - Karten sind aufklappbar → zeigt die enthaltenen Pfade.
-- Status: `Entwurf` → `In Warteschlange` → `Läuft` (mit Fortschrittsbalken) → `Fertig` / `Fehlgeschlagen`.
+- Status: `Entwurf` → `In Warteschlange` → `Läuft` (mit Fortschrittsbalken) → `Fertig` / `Fehlgeschlagen` / `Abgebrochen`; während eines laufenden Abbruchs zeigt die Karte `Abbruch angefordert`.
 - Abgeschlossene Jobs bleiben in der Historie sichtbar.
+- Jobs können unterschiedliche gepinnte Generationen enthalten.
 
 ### 3.5 Ausführungszone
 - Ein definierter Bereich (z. B. unterer Rand oder spezielles Drop-Target),
   auf den man einen Job zieht um ihn zu starten.
 - Vor Ausführung: Bestätigungsdialog mit Zusammenfassung (was, wohin, geschätzte Dauer).
 - Bei Restore: Zielverzeichnis-Auswahl im Dialog.
+- Vor Ausführung werden Revision/Referenzen der gepinnten Items validiert. Bei
+  fehlenden oder inkonsistenten referenzierten Daten bricht der Job ab, statt
+  unbemerkt auf die neueste Version umzuschalten.
+
+### 3.6 Ladevorgänge und lange Aufgaben
+
+- Jede potenziell lange Aktion – Host/Repo öffnen, Index-/Baumladen,
+  Remote-DB-Abfrage, Backup erstellen, Restore, Check, Prune – zeigt stets die
+  aktuelle Phase, was Ianus gerade tut, aussagekräftige Zähler (erledigt/gesamt)
+  und die verstrichene Zeit.
+- Restzeit/ETA nur, wenn sie aus gemessener Arbeit glaubwürdig ableitbar ist;
+  sonst unbestimmter Fortschritt und ehrlicher Status. Prozentwerte und ETAs
+  werden nie erfunden.
+- Das Feedback bleibt live, klar und ruhig (CleanMyMac-Anmutung) und vermittelt,
+  dass Warten sinnvoll ist.
+- Das Anlegen von Backups/Archiven wirkt beruhigend und motivierend durch
+  Klarheit, eine Abschluss-Zusammenfassung und verständliche Ergebnisse – nicht
+  durch Gamification oder unechte Erfolgsversprechen.
+- Abschließbare Arbeit bietet Cancel. Ein Bestätigungsdialog erscheint nur, wenn
+  der Abbruch Nebenwirkungen riskiert. Nach einer Cancel-Anfrage zeigt die UI
+  `Abbruch angefordert`, bis Backend/Prozess tatsächlich gestoppt ist; danach
+  `Abgebrochen`/`Gestoppt` oder die tatsächlichen Teileffekte.
+- Bei Remote-DB-Laden stoppt Cancel die Anfrage/den Scan, wo unterstützt, und
+  gibt Cursor/Ressourcen frei. Unvollständige Daten werden nie als vollständig
+  präsentiert.
 
 ## 4. Konfigurationsbereich
 
@@ -78,11 +117,35 @@ Erreichbar über Einstellungen-Icon in der Toolbar:
 
 ## 6. Design-Sprache
 
-- Inspiriert von CleanMyMac: heller Hintergrund, sanfte Schatten, abgerundete Karten.
+- Starke gestalterische Anlehnung an CleanMyMacs klare, hochwertige, ruhige
+  Utility-Anmutung – ohne pixelgenaue Kopie.
+- Konsistente Abstände, klare Hierarchie, leichte Oberflächen/Karten.
+- Zurückhaltende Akzentfarbe und verständliche Icons.
 - Farbschema: Neutrales Grau + ein Akzentton (vorläufig Blau/Teal, anpassbar).
 - Icons: Lucide oder Phosphor (MIT-lizenziert).
 - Typografie: System-Font-Stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", ...`).
-- Animationen: Dezent, max. 300ms, für Drag-Feedback und Panel-Übergänge.
+- Der Benutzer muss keine UX-/Designvorgaben liefern.
+
+### 6.1 Animationen
+
+- Subtile, funktionale Transitionen für Panel-/Dock-Wechsel, Drag-and-drop-
+  Feedback, Job-Zustände und Fortschritt.
+- Kurz, konsistent, keine ablenkenden Effekte; nie als einzige Zustandsanzeige.
+- `prefers-reduced-motion` wird respektiert: Animationen werden dann deaktiviert
+  oder reduziert.
+- Dauer: dezent, max. 300ms.
+- Lade- und Fortschrittsanzeigen bleiben konsistent zur bestehenden Gestaltung
+  (siehe 3.6); keine abweichenden Lade-Muster.
+
+## 7. Mockup-Review vor Frontend-Implementierung
+
+- Vor der Frontend-Implementierung präsentiert die AI ein verständlich
+  annotiertes Mockup der zentralen Oberfläche, inklusive der Umschaltung des
+  Job-Docks (rechts/unten) und des Restore-Jobs per Drag & Drop.
+- Das Mockup enthält eine empfohlene Startvariante und einfache Feedbackfragen.
+- Die AI führt den Benutzer ohne UX-Vorkenntnisse durch die Entscheidungen.
+- Erst nach Nutzerfeedback/Freigabe wird die Frontend-Implementierung
+  vorgeschlagen.
 
 ---
 
