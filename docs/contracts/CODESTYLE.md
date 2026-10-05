@@ -52,13 +52,12 @@ Status: FREIGEGEBEN
 
 - Einrückung ausschließlich mit Tabs; Tabstopps sind 3 Spalten breit.
 - Klammerstil: K&R (öffnende Klammer auf derselben Zeile).
-- Handgeschriebene Quellcodedateien dürfen höchstens 2000 Zeichen enthalten
-  (Anordnung des Auftraggebers: 2000 statt 1000, um Fragmentierung zu
-  vermeiden), einschließlich Leerraum und Kommentaren. Bei drohender Überschreitung wird der
-  Code automatisch entlang semantisch zusammengehöriger Verantwortlichkeiten auf
-  mehrere Dateien mit passenden Namen aufgeteilt oder refaktoriert. Die Aufteilung
-  darf keine unnötigen Abstraktionen oder künstliche Fragmentierung erzeugen.
-  Generierte und vendorte Dateien sind ausgenommen.
+- Handgeschriebene Quellcodedateien dürfen höchstens 1000 Zeilen enthalten
+  (Anordnung des Auftraggebers: harte Obergrenze, bewusst großzügig). Die
+  Erlaubnis größerer Dateien schließt nicht aus, dass selbstverständlich
+  semantisch aufgeteilt wird: Kompilierbares pro Datei richtet sich nach
+  inhaltlicher Zuständigkeit, nicht nach der Obergrenze. Generierte und
+  vendorte Dateien sind ausgenommen.
 - rustfmt-Konfiguration (`rustfmt.toml`, hard_tabs, tabsize 3) wird im Repo hinterlegt.
 
 ### 1.5 Speicherverwaltung
