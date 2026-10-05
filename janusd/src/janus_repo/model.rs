@@ -20,10 +20,13 @@ pub struct RepoSpec {
 	/// Borg repository location (`file://`, `ssh://`, `sftp://`, `borg://`).
 	pub location: String,
 	/// Optional reference to a secret (passphrase/key) by name.
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub secret_ref: Option<String>,
 	/// Optional human-readable label.
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub label: Option<String>,
 	/// Optional free-form notes.
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub notes: Option<String>,
 }
 
