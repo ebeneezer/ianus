@@ -1,7 +1,7 @@
 # Janus – Code-Style-Vertrag
 
-Version: 0.4.0
-Status: FREIGEGEBEN
+Version: 0.5.0
+Status: ENTWURF – Source-Limit auf 1000 Zeilen geändert; erneute Freigabe erforderlich
 
 ## 1. Backend (Rust)
 
