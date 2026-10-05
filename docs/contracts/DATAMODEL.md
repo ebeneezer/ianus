@@ -1,7 +1,7 @@
 # Janus – Datenmodell-Vertrag
 
-Version: 0.3.0
-Status: FREIGEGEBEN
+Version: 0.4.0
+Status: ENTWURF – Korrektur nach Live-Verifikation Borg 2.0.0b25; erneute Freigabe erforderlich
 
 ## 1. Kernentitäten
 
@@ -254,12 +254,19 @@ Schlüssel sind stabile, nicht-JSON-hierarchische Namespaces und Identifikatoren
 
 1. **Vollindexierung (Borg 2)**: Beim Hinzufügen eines Repos werden alle
    Archive eingelesen – Repository via `-r`/`BORG_REPO`, Archiv positional
-   (kein `repo::archive`). `--json-lines` nur für UTF-8-sichere Felder;
-   Byte-Pfadtreue zwingend über non-JSON `--format` (`bpath`), da `bpath`
-   in JSON/JSONL nicht verfügbar ist (JSON verlangt valides UTF-8).
-   **Blockierende offene Anforderung vor der Indexer-Tranche**: Nachweis
-   der Byte-Pfadtreue mit realen non-UTF8-Dateinamen gegen ein echtes
-   Borg-2-Repo; erst danach gelten Restore-Identitäten als stabil.
+   (kein `repo::archive`). **Byte-Pfadtreue über `path_b64` in
+   `--json-lines`** (Live-Nachweis gegen Borg 2.0.0b25, siehe unten):
+   Bei non-UTF8-Pfaden liefert `borg list --json-lines` zusätzlich das
+   Feld `path_b64` (base64, byte-genau), während `path` verstümmelt ist.
+   Der Indexer liest `path_b64`, falls vorhanden, sonst `path`.
+   Der non-JSON-`--format`-Weg über `bpath` ist **entfallen**: das
+   `bpath`-Format-Key existiert in 2.0.0b25 nicht mehr
+   (`Invalid format keys: bpath`).
+   **Blockierende Anforderung: gelöst** – Nachweis mit realen
+   non-UTF8-Dateinamen gegen ein echtes Borg-2-Repo (2.0.0b25, lokal):
+   `path_b64` ist byte-genau; Restore-Identitäten gelten als stabil.
+   Offen bleibt allein die Pin-Verifikation gegen den Borg-Server des
+   Auftraggebers.
 2. **Generationen**: Jeder Index-Lauf erzeugt und füllt eine neue Generation
    (`state = building`). Erst nach erfolgreichem Indexieren wird sie atomar
    als `published` veröffentlicht und als `current_generation_id` gesetzt;

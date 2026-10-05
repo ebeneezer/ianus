@@ -1,7 +1,7 @@
 # Janus – Architekturvertrag
 
-Version: 0.4.0
-Status: FREIGEGEBEN
+Version: 0.5.0
+Status: ENTWURF – Korrektur nach Live-Verifikation Borg 2.0.0b25 (path_b64, Subcommand-Renames, Pin); erneute Freigabe erforderlich
 
 ## 1. Überblick
 
@@ -77,16 +77,21 @@ flowchart TB
 - **Zielversion (Auftraggeberfestlegung)**: ausschließlich **Borg 2 Beta**
   (2.0.0b-Serie); Borg 1 wird nicht unterstützt – die Pflege beider
   Versionen wäre zu codeaufwändig. Migration Borg 1 → 2 erfolgt per
-  `borg transfer` (Phase-3-Task). Die konkret getestete Beta-Version wird
-  gegen den Borg-Server des Auftraggebers verifiziert und hier nachgetragen
-  (offene Anforderung).
+  `borg transfer` (Phase-3-Task). **Gepinnt: 2.0.0b25** – lokal
+  verifiziert (`borg --version` → `borg 2.0.0b25`); Verifikation gegen
+  den Borg-Server des Auftraggebers bleibt offen.
 - **Borg-2-Adressierung**: kein `repo::archive`; Repository via `-r`/
   `BORG_REPO`, Archiv positional; eindeutige Archiv-Instanz via `aid:`-
-  Präfix; Mengenauswahl via `-a`/`--match-archives`.
+  Präfix; Mengenauswahl via `-a`/`--match-archives`. Live-Hinweis b25:
+  Repo-Ebene nutzt umbenannte Subcommands (`repo-create`, `repo-list`
+  mit `--json`, `repo-info`), Datei-Ebene `list --json-lines`.
+  `-e none` entfällt (nur `aes256-ocb`, `chacha20-poly1305`,
+  `authenticated-sha256`, `authenticated-blake3`, jeweils Passphrase).
 - **Borg-Integration**: Subprozess-Steuerung (`std::process::Command`,
-  asynchron via tokio). `--json`/`--json-lines` nur für UTF-8-sichere Felder;
-  Byte-Pfadtreue über non-JSON `--format` (`bpath` fehlt in JSON-Ausgaben,
-  siehe DATAMODEL §3.1). Kein Python-Embedding.
+  asynchron via tokio). **Byte-Pfadtreue über `path_b64` in
+  `--json-lines`** (bei non-UTF8-Pfaden byte-genau; `path` dann
+  verstümmelt); `bpath` als `--format`-Key existiert in 2.0.0b25 nicht
+  mehr (Live-Nachweis, siehe DATAMODEL §3.1). Kein Python-Embedding.
 - **Secrets**: `systemd-creds` oder `BORG_PASSCOMMAND`; niemals Klartext in
   Konfigurationsobjekten.
 - **Build**: cargo (Rust-Standard); CMake entfällt.
