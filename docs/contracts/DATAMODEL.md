@@ -1,7 +1,7 @@
 # Janus – Datenmodell-Vertrag
 
-Version: 0.4.0
-Status: ENTWURF – Korrektur nach Live-Verifikation Borg 2.0.0b25; erneute Freigabe erforderlich
+Version: 0.5.0
+Status: ENTWURF – Dual-Version-Support (Borg 1.4.x / 2.0.0b) nach Auftraggeber-Anordnung und Live-Verifikation; erneute Freigabe erforderlich
 
 ## 1. Kernentitäten
 
@@ -20,7 +20,8 @@ Tabellenpersistenz. Physische Datenhaltung ist ausschließlich das KV-Backend
 | host                  | TEXT NULL        | Hostname (bei Remote)                                      |
 | port                  | INTEGER NULL     | Port (bei Remote)                                          |
 | user                  | TEXT NULL        | Benutzer (bei Remote)                                      |
-| path                  | TEXT             | Pfad zum Repository                                        |
+| path                  | TEXT            | Pfad zum Repository                                        |
+| borg_version          | ENUM            | Ziel-Borg-Serie: "1" (1.4.x, Server des Auftraggebers) oder "2" (2.0.0b); pro Repo/Host-Konfiguration umschaltbar (Auftraggeberanordnung – V2-only-Zug widerrufen) |
 | secret_ref            | TEXT NULL        | Referenz auf Passphrase/Schlüssel                          |
 | last_indexed_at       | TIMESTAMP        | Letzter erfolgreicher Index-Lauf                           |
 | current_generation_id | FK → generations | Aktuell veröffentlichte Generation (NULL vor erstem Index) |
@@ -57,6 +58,7 @@ Dies ist die zentrale Tabelle für den "Merged Filesystem Tree":
 | uid          | INTEGER      | Eigentümer-UID                             |
 | gid          | INTEGER      | Gruppen-GID                                |
 | hash         | TEXT NULL     | Content-Hash (wenn von Borg geliefert)     |
+| path_fidelity | ENUM         | `exact` (V2: `path_b64`) oder `mangled` (V1: `?`-Ersatz); V1-Items nie stillschweigend als exakt behandelt |
 
 **Indizes**:
 - `(repo_id, path, Archiv-Rangfolge)` – Rang nach Archivfolge, nicht mtime – für "aktuellste Version pro Pfad"
@@ -252,21 +254,31 @@ Schlüssel sind stabile, nicht-JSON-hierarchische Namespaces und Identifikatoren
 
 ## 3. Indexierungsstrategie
 
-1. **Vollindexierung (Borg 2)**: Beim Hinzufügen eines Repos werden alle
-   Archive eingelesen – Repository via `-r`/`BORG_REPO`, Archiv positional
-   (kein `repo::archive`). **Byte-Pfadtreue über `path_b64` in
-   `--json-lines`** (Live-Nachweis gegen Borg 2.0.0b25, siehe unten):
-   Bei non-UTF8-Pfaden liefert `borg list --json-lines` zusätzlich das
-   Feld `path_b64` (base64, byte-genau), während `path` verstümmelt ist.
-   Der Indexer liest `path_b64`, falls vorhanden, sonst `path`.
-   Der non-JSON-`--format`-Weg über `bpath` ist **entfallen**: das
-   `bpath`-Format-Key existiert in 2.0.0b25 nicht mehr
-   (`Invalid format keys: bpath`).
-   **Blockierende Anforderung: gelöst** – Nachweis mit realen
-   non-UTF8-Dateinamen gegen ein echtes Borg-2-Repo (2.0.0b25, lokal):
-   `path_b64` ist byte-genau; Restore-Identitäten gelten als stabil.
-   Offen bleibt allein die Pin-Verifikation gegen den Borg-Server des
-   Auftraggebers.
+1. **Vollindexierung**: Die Borg-Serie steht pro Repo über
+   `repos.borg_version` fest ("1"/"2", Auftraggeberanordnung – der
+   einzige produktive Borg-Server läuft 1.4.0). Beim Hinzufügen eines
+   Repos werden alle Archive eingelesen – Repository via `-r`/
+   `BORG_REPO`, Archiv positional.
+   - **Borg 2 (2.0.0b25, lokal live verifiziert)**: **Byte-Pfadtreue
+     über `path_b64` in `--json-lines`**: Bei non-UTF8-Pfaden liefert
+     `borg list --json-lines` zusätzlich `path_b64` (base64,
+     byte-genau), während `path` verstümmelt ist; der Indexer liest
+     `path_b64`, falls vorhanden, sonst `path`. Der `bpath`-Format-Key
+     existiert nicht mehr (`Invalid format keys: bpath`). Nachweis mit
+     realen non-UTF8-Dateinamen: **Restore-Identitäten sind
+     byte-stabil.**
+   - **Borg 1 (Server 1.4.0 / Client 1.4.5, live verifiziert)**: **kein
+     `path_b64`** (Feld existiert in 1.4.x nicht); `path` verstümmelt
+     non-UTF8 zu `?` – `--format` ebenfalls (Live-Nachweis). Es gibt
+     **keinen byte-genauen textuellen Kanal** in Serie 1. Konsequenz:
+     Restore-Identitäten sind für **UTF-8-Pfade** stabil; non-UTF8-
+     Einträge werden mit **Fidelity-Kennzeichnung** indexiert
+     (`path_fidelity`-Feld), Restore des Einzelpfads ist unzuverlässig
+     und wird als solcher ausgewiesen; dokumentierter Fallback ist der
+     Subbaum-Restore über den letzten vollständig UTF-8-fähigen
+     Vorfahren. Migrationsempfehlung: Server-Überführung auf Borg 2
+     (`borg transfer`, Phase 3) – der Fidelity-Unterschied ist der
+     wesentliche Grund, Serie 2 als Ziel zu führen.
 2. **Generationen**: Jeder Index-Lauf erzeugt und füllt eine neue Generation
    (`state = building`). Erst nach erfolgreichem Indexieren wird sie atomar
    als `published` veröffentlicht und als `current_generation_id` gesetzt;

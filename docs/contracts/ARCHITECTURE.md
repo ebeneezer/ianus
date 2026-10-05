@@ -1,7 +1,7 @@
 # Janus – Architekturvertrag
 
-Version: 0.5.0
-Status: ENTWURF – Korrektur nach Live-Verifikation Borg 2.0.0b25 (path_b64, Subcommand-Renames, Pin); erneute Freigabe erforderlich
+Version: 0.6.0
+Status: ENTWURF – Dual-Version-Support Borg 1.4.x/2.0.0b pro Repo (borg_version), Live-Verifikation Auftraggeber-Server 1.4.0; erneute Freigabe erforderlich
 
 ## 1. Überblick
 
@@ -74,24 +74,31 @@ flowchart TB
   inkrementell/streamend geparst (serde `StreamDeserializer`-Prinzip oder
   handgefilterter NDJSON-Reader); eine ganze große Borg-Antwort wird niemals
   vollständig als DOM im Speicher gehalten.
-- **Zielversion (Auftraggeberfestlegung)**: ausschließlich **Borg 2 Beta**
-  (2.0.0b-Serie); Borg 1 wird nicht unterstützt – die Pflege beider
-  Versionen wäre zu codeaufwändig. Migration Borg 1 → 2 erfolgt per
-  `borg transfer` (Phase-3-Task). **Gepinnt: 2.0.0b25** – lokal
-  verifiziert (`borg --version` → `borg 2.0.0b25`); Verifikation gegen
-  den Borg-Server des Auftraggebers bleibt offen.
-- **Borg-2-Adressierung**: kein `repo::archive`; Repository via `-r`/
-  `BORG_REPO`, Archiv positional; eindeutige Archiv-Instanz via `aid:`-
-  Präfix; Mengenauswahl via `-a`/`--match-archives`. Live-Hinweis b25:
-  Repo-Ebene nutzt umbenannte Subcommands (`repo-create`, `repo-list`
-  mit `--json`, `repo-info`), Datei-Ebene `list --json-lines`.
-  `-e none` entfällt (nur `aes256-ocb`, `chacha20-poly1305`,
-  `authenticated-sha256`, `authenticated-blake3`, jeweils Passphrase).
+- **Zielversionen (Auftraggeberfestlegung)**: **zwei gepinnte Serien, pro
+  Repo umschaltbar** (`repos.borg_version`, "1"/"2") – der einzige
+  produktive Borg-Server des Auftraggebers läuft 1.4.0; der frühere
+  V2-only-Zug ist widerrufen.
+  - **V1**: Borg **1.4.x** – Server `gw.oldfire.de:22222` mit
+    `borg 1.4.0` **live verifiziert**; lokaler Client 1.4.5.
+  - **V2**: Borg **2.0.0b25** – lokal live verifiziert.
+  Migration V1 → V2 per `borg transfer` (Phase-3-Task); Empfehlung: V1
+  als Übergangsmodus mit Fidelity-Kompromiss, Serie 2 als Ziel.
+- **Adressierung je Serie**: V2: kein `repo::archive`; Repository via
+  `-r`/`BORG_REPO`, Archiv positional; eindeutige Archiv-Instanz via
+  `aid:`-Präfix; Mengenauswahl via `-a`/`--match-archives`; Repo-Ebene
+  nutzt umbenannte Subcommands (`repo-create`, `repo-list` mit `--json`,
+  `repo-info`), Datei-Ebene `list --json-lines`; `-e none` entfällt.
+  V1: Repository via `-r`/`BORG_REPO`, Archiv positional oder klassisch
+  `repo::archive`; Repo-Ebene `list --json`, Datei-Ebene
+  `list --json-lines` (beide live am Server verifiziert).
 - **Borg-Integration**: Subprozess-Steuerung (`std::process::Command`,
-  asynchron via tokio). **Byte-Pfadtreue über `path_b64` in
-  `--json-lines`** (bei non-UTF8-Pfaden byte-genau; `path` dann
+  asynchron via tokio). **Byte-Pfadtreue (V2)** über `path_b64` in
+  `--json-lines` (bei non-UTF8-Pfaden byte-genau; `path` dann
   verstümmelt); `bpath` als `--format`-Key existiert in 2.0.0b25 nicht
-  mehr (Live-Nachweis, siehe DATAMODEL §3.1). Kein Python-Embedding.
+  mehr. **V1 hat keinen byte-genauen textuellen Pfadkanal**: kein
+  `path_b64`, `path` und `--format` verstümmeln non-UTF8 zu `?`
+  (Live-Nachweis 1.4.5) – non-UTF8-Items werden mit Fidelity-Kennzeichnung
+  indexiert (DATAMODEL §1.3, §3.1). Kein Python-Embedding.
 - **Secrets**: `systemd-creds` oder `BORG_PASSCOMMAND`; niemals Klartext in
   Konfigurationsobjekten.
 - **Build**: cargo (Rust-Standard); CMake entfällt.
@@ -113,6 +120,13 @@ werden aus den Transportfeldern gebildet, kein `repo::archive` mehr.
 Zugriffskonfigurationen werden in der DB gespeichert; Passphrasen und
 SSH-Schlüssel werden über referenzierte Secret-IDs (systemd-creds oder
 verschlüsselt in der DB mit einem Master-Key) aufgelöst, nie inline.
+
+**Live-verifiziertes Referenz-Repo (Auftraggeber)**:
+`ssh://borg@gw.oldfire.de:22222/data/borg/repos/kayda` – Borg 1.4.0,
+Auth per SSH-Schlüssel `id_ed25519`, Passphrase ausschließlich via
+`BORG_PASSCOMMAND` aus dem lokalen Secret-Speicher (nie Klartext in
+Konfiguration, Argumenten oder Logs); `list --json` (71 Archive) und
+`list --json-lines` live geprüft.
 
 ## 5. Persistenz: KV Access API und Backend-Adapter
 

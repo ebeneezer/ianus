@@ -1,99 +1,84 @@
-# Tranche R-3b: janus_borg – Borg-2-Subprozess-Skelett
+# Tranche R-3b: janus_borg – Borg-Subprozess-Skelett (Dual-Version)
 
-Status: zur Implementierung freigegeben („weitermachen“, „Deine Entscheidung“);
-Contract-Korrektur DATAMODEL 0.4.0 / ARCHITECTURE 0.5.0 läuft separat als ENTWURF.
+Status: Plan freigegeben („weitermachen“, „Deine Entscheidung“); **an
+ENTWURF-Verträge gebunden**: DATAMODEL 0.5.0 / ARCHITECTURE 0.6.0 (Dual-
+Version borg_version "1"/"2") müssen vor Implementierung freigegeben
+werden. Implementierung ruht bis dahin (AGENTS.md-Regel).
 
-## Live-Verifikation Borg 2.0.0b25 (lokale Installation, venv /tmp/borg2env)
+## Live-Verifikation (beide Serien, echte Repos)
 
-- `borg --version` → `borg 2.0.0b25`
-- `borg list --json-lines -r REPO ARCHIV`: bei non-UTF8-Pfaden zusätzlich Feld
-  `path_b64` (base64, byte-genau); `path` verstümmelt (`??`-Ersatz).
-  Smoke-Repo: `/tmp/janus-borg-smoke/testrepo.borg` (authenticated-blake3;
-  Passphrase nur via `BORG_PASSCOMMAND`, nie Klartext/Args/Logs).
-- `bpath` als `--format`-Key existiert nicht mehr: `Invalid format keys: bpath`.
-- Repo-Ebene: `borg repo-list --json -r REPO` (umbenannte Subcommands
-  `repo-create`/`repo-list`/`repo-info`; `--json`, kein `--json-lines`).
-- `-e none` entfallen; Wahl: `aes256-ocb`, `chacha20-poly1305`,
-  `authenticated-sha256`, `authenticated-blake3` (jeweils Passphrase nötig).
-- Pin-Verifikation gegen den Borg-Server des Auftraggebers: offen
-  (Substantielle Frage: Verbindungsdetails/Secret-Referenz für Server-Test).
+- **V2**: `/tmp/borg2env/bin/borg` = `borg 2.0.0b25`; Smoke-Repo
+  `/tmp/janus-borg-smoke/testrepo.borg` (authenticated-blake3, Passphrase
+  via BORG_PASSCOMMAND aus /tmp/janus-secrets/). `list --json-lines`
+  liefert bei non-UTF8 zusätzlich `path_b64` (base64, byte-genau);
+  `path` verstümmelt; `bpath`-Format-Key existiert nicht
+  (`Invalid format keys: bpath`).
+- **V1 Server (Auftraggeber)**: `ssh://borg@gw.oldfire.de:22222/…
+  /kayda` – `borg --version` → `borg 1.4.0`; Auth SSH-Key
+  `id_ed25519`; `list --json` → 71 Archive; `list --json-lines`
+  Archiv `kayda-c54d7f19` → Felder type/mode/user/group/uid/gid/path/
+  healthy/source/linktarget/flags/mtime/size. Passphrase nur via
+  `BORG_PASSCOMMAND="cat /tmp/janus-secrets/kayda.pass"` (0600, außerhalb
+  des Repos; nie in Argumenten/Logs/Commits/Verträgen).
+- **V1 Byte-Fidelity (lokaler Live-Nachweis 1.4.5)**: Testdatei mit
+  `\xff\xfe` im Namen: `--json-lines`-`path` = `bad??name` (literal `?`),
+  **kein** `path_b64`-Feld (Feldliste vollständig geprüft);
+  `--format '{path}'` verstümmelt ebenso. **Serie 1 hat keinen
+  byte-genauen textuellen Pfadkanal.** → `path_fidelity`-Kennzeichnung
+  + Subbaum-Fallback (DATAMODEL §1.3/§3.1).
 
-## Umfang
+## Umfang (Code erst nach Vertragfreigabe)
 
-Neues Modul `janus_borg` + Tests + Cargo/CHANGELOG. Keine HTTP-Endpunkte, kein
-main.rs-Wiring (außer `pub mod janus_borg;` in lib.rs), keine Secrets-Logik,
-kein Indexer, keine Änderungen an bestehenden Modulen.
+Neues Modul `janus_borg` + Tests + Cargo/CHANGELOG; RepoSpec-Schema 2
+mit Pflichtfeld `borg_version` ("1"/"2"); REST durchgeschleift.
 
-### Module (jede Datei ≤ 2000 Bytes, Tabs, SPDX, /// auf allen pub-Items)
+### janus_borg-Module (je ≤ 2000 Bytes, Tabs, SPDX, /// auf pub-Items)
 
-- `mod.rs`: Modul-Doku; Re-Exports `BorgChild`, `BorgCmd`, `Error`,
-  `EXPECTED_PREFIX`, `probe_version`; Live-Fakten (path_b64, bpath entfallen,
-  repo-list --json, Pin 2.0.0b25).
-- `error.rs`: `Spawn(String)`, `Io(#[from] std::io::Error)`,
-  `Version { found, expected }`, `Exit { code, stderr }`.
-- `version.rs`: `EXPECTED_PREFIX = "2.0.0b"`; `check_version(&str) ->
-  Result<String, Error>` (erste Zeile, Präfix `borg `, Serie prüfen).
-- `cmd.rs`: `BorgCmd { bin, args }`: `new`, `repo` (`-r <location>`),
-  `archive` (positional, kein `repo::archive`), `arg`, `json_lines`,
-  `build()` → tokio::process::Command (stdin null, stdout/stderr piped).
-- `child.rs`: `DEFAULT_GRACE = 5s`; `BorgChild` mit `spawn`, `set_grace`,
-  `next_stdout_line` (zeilenweise, bounded), `last_stderr` (nur letzte Zeile),
-  `finish` (drain beider Pipes bis EOF, dann `wait()` = Reap; nonzero →
-  `Exit { code, stderr }`), `cancel` = Eskalationsleiter TASKFRAMEWORK §2:
-  reaped? → gecachter Status (kein Signal an recycelten PID!) → `try_wait` →
-  SIGTERM (nix::sys::signal::kill, KEIN unsafe im janusd-Code) → Grace-Drain
-  mit `tokio::time::timeout(grace)` → sonst SIGKILL → drain → Reap.
-  Rückkehr erst nach tatsächlichem Ende; Drop ohne cancel beendet das Kind
-  nicht (kill_on_drop false, dokumentiert). `probe_version(bin)`:
-  `--version` → sammeln (winzig) → `finish` → `check_version`.
-- `drain(&mut self)` privat: stdout+stderr bis EOF, stdout verwerfen, nur
-  letzte stderr-Zeile behalten (bounded).
+- `mod.rs`: Re-Exports + Live-Fakten (beide Pins, path_b64 nur V2,
+  V1-Verstümmelung, bpath entfallen, Subcommand-Renames V2).
+- `error.rs`: `Spawn`, `Io(#[from])`, `Version{found,expected}`, `Exit{code,stderr}`.
+- `version.rs`: `BorgSeries`-Enum `V1_4`/`V2_0B`; Pins `1.4.` bzw.
+  `2.0.0b`; `check_version(&str)` prüft erste Zeile `borg <ver>` gegen
+  den Pin der Serie; beide Serien sind zulässig, fremde nicht.
+- `cmd.rs`: `BorgCmd{bin,series,args}`: `repo` (`-r <location>`; einheitlich
+  V1+V2), `archive` (positional; V2 zusätzlich `aid:`-Instanz erlaubt),
+  `repo_listing` (**seriengetrennt**: V1 `list --json`, V2 `repo-list
+  --json`), `json_lines`, `build()`.
+- `child.rs`: Eskalationsleiter TASKFRAMEWORK §2 (SIGTERM → Grace-Drain →
+  SIGKILL → Reap; Reaped-Guard gegen PID-Wiederverwendung; Rückkehr erst
+  nach tatsächlichem Ende); `next_stdout_line` (zeilenweise, bounded);
+  `finish` (Drain beider Pipes, nonzero → `Exit`); `probe_version(bin)`
+  → Serie-Erkennung.
+- `drain` privat: stdout verwerfen, nur letzte stderr-Zeile behalten.
 
-### Tests (Stub-Skripte, deterministisch; je ≤ 2000 Bytes)
+### janus_repo (Schema-Bump)
 
-- `tests/borg_common/mod.rs`: `temp_dir(name)`, `stub_bor(dir, name, body)`
-  (chmod 0755), `sleep_stub_body()`.
-- `tests/borg_version.rs`: Unit-Checks (ok/mismatch/garbage) + Stub-Probe
-  ok (`borg 2.0.0b13`) + mismatch (`borg 1.2.3`, Fehlermeldung enthält beide).
-- `tests/borg_cmd.rs`: Echo-Args-Stub verifiziert
-  `["-r", "ssh://u@h/p.borg", "aid:abc", "--json-lines"]` (Borg-2-Stil,
-  echter Prozess).
-- `tests/borg_stream.rs`: Stub 5 JSONL-Zeilen; 5× lesen, dann `None`;
-  `finish` success.
-- `tests/borg_cancel.rs` (ggf. splitten): graceful (`trap 'exit 0' TERM`;
-  grace 2s → success, < 2s), stur (`trap '' TERM`; grace 300ms →
-  `status.signal() == Some(9)`, ≥ 300ms), nach-Exit (`exit 7`; `finish`
-  → `Exit { 7 }`, danach `cancel` deterministisch, kein Panic – Reaped-Guard).
-- `tests/borg2_live.rs`: env-gegated (`JANUS_BORG2_BIN`); ohne Var
-  deterministisch übersprungen; Aufruf z. B.
-  `JANUS_BORG2_BIN=/tmp/borg2env/bin/borg cargo test --test borg2_live`.
+- `RepoSpec.schema_version` 1 → 2; neues Pflichtfeld `borg_version`
+  (`"1"`/`"2"`, Werte-Validierung); keine stillschweigende Default-Serie.
+  REST PUT/GET unverändert durchgeschleift; bestehende Tests ergänzt.
 
-### Cargo.toml (janusd/)
+### Tests (Stubs deterministisch; Live env-gegated)
 
-- tokio features: + `process`, `io-util`, `time`
-- neu: `nix = { version = "0.29", features = ["signal"] }` (sichere
-  kill-Kapselung statt libc/unsafe; bei Resolverproblemen 0.28, gleiches API)
-- kein neues dev-dependency (eigene temp-Helfer)
+- Stub-Matrix Version: ok `borg 1.4.5`, ok `borg 2.0.0b13`, fail
+  `borg 1.2.3`, fail `borg 3.0.0b1`, fail Müll.
+- Adressierung: `["-r", "ssh://borg@gw.oldfire.de:22222/…/kayda",
+  "kayda-c54d7f19", "--json-lines"]` (V1) und `aid:`-Form (V2).
+- Streaming (5 JSONL-Zeilen → `None`), Cancel graceful (`trap 'exit 0'`),
+  stur (`trap ''` → SIGKILL nach Grace), nach-Exit (`exit 7`; `cancel`
+  danach deterministisch).
+- Live: `JANUS_BORG1_BIN` (Server-Repo, volle Archivliste) und
+  `JANUS_BORG2_BIN` (/tmp/borg2env); ohne Env deterministisch übersprungen.
 
-### CHANGELOG ([Unreleased]/Added)
+### Cargo (janusd/)
 
-- janus_borg: Borg-2 subprocess skeleton – command builder (-r addressing,
-  positional archives), bounded line streaming, SIGTERM→SIGKILL cancel ladder
-  with grace, version probe mit 2.0.0b-Serien-Pin (2.0.0b25 lokal verifiziert)
-- Tests via Stubs (Pin, Adressierung, Streaming, Cancel graceful/stur/nach-
-  Exit); optionaler Live-Test via JANUS_BORG2_BIN
+tokio features + `process`, `io-util`, `time`; neu `nix 0.29`
+(feature `signal`) für kill ohne unsafe.
 
-## Verifikationsreihenfolge
+## Churn-Schätzung (Schätzung, kein Messwert)
 
-`export PATH="$HOME/.cargo/bin:$PATH"; cd janusd`
-`cargo fmt && cargo fmt --check && cargo clippy --all-targets -- -D warnings
-&& cargo test`; dann Dateigrößen prüfen (alle ≤ 2000 Bytes); bestehende
-27 Tests müssen grün bleiben. Danach Live-Test gegen /tmp/borg2env/bin/borg.
-
-## Churn-Schätzung und Risiko (Stand vor Implementierung)
-
-- Churn: ~10 neue Dateien (5 Modul-, 5–6 Testdateien) + 3 bestehende
-  (lib.rs, Cargo.toml, Cargo.lock, CHANGELOG) – Schätzung, kein Messwert.
-- Risiko mittel: Cancel-Ladder (Timeout vs. Drain-Interaktion) und
-  PID-Wiederverwendung (Reaped-Guard) sind die kritischen Stellen; beide
-  durch Tests abgedeckt. Beta-Drift bleibt strukturell (Pin + Smoke-Tests).
+~16 Dateien: 5 Modul- + 6 Test-Dateien neu, 5 bestehende berührt
+(lib.rs, Cargo.toml, Cargo.lock, CHANGELOG, RepoSpec-Modell + dessen
+Tests). Risiko mittel: Cancel-Ladder-Timeouts und PID-Wiederverwendung
+(Reaped-Guard) bleiben die kritischen Stellen; neu: Serien-Verzweigung
+bei Repo-Listing (`list` vs `repo-list`) als Tabellen-Dispatch.
+Beta-Drift V2 durch Pin+Smoke-Tests gebunden.
