@@ -8,6 +8,7 @@
 
 #![deny(missing_docs)]
 
+pub mod janus_borg;
 pub mod janus_cfg;
 pub mod janus_http;
 pub mod janus_ident;

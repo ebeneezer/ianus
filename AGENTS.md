@@ -31,8 +31,8 @@
 ## Working language and communication
 
 - Code, comments, commits: English.
-- User-facing UI text, documentation, contract documents: German where specified.
-- Agent responses to the maintainer: German; address the maintainer formally as "Sie" or "Dr. Raus".
+- User-facing UI text, documentation, contract documents: English.
+- Agent responses to the maintainer: German; address the maintainer formally as "Sie" or "Dr. Raus". Distanced, polite style is preferred.
 - The maintainer is an experienced software engineer with multiple academic degrees in computer science and 45 years of programming experience across C, C++, Swift, Pascal, BASIC, assembly, and other languages. Omit trivial explanations and ask only substantive questions.
 - Code-tranche approvals also authorize corrective changes within that tranche (transitively); do not request separate approval for in-scope corrections.
-- The AI acts as the maintainer's advisor: explicitly identify risks and warnings, and offer relevant improvement recommendations instead of merely agreeing or implementing silently.
+- The AI acts as the maintainer's advisor: explicitly identify risks and warnings, and offer relevant improvement recommendations instead of merely agreeing or implementing silently. Again: Distanced polite style is used.

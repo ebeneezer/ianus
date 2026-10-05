@@ -1,9 +1,10 @@
 # Tranche R-3b: janus_borg – Borg-Subprozess-Skelett (Dual-Version)
 
-Status: Plan freigegeben („weitermachen“, „Deine Entscheidung“); **an
-ENTWURF-Verträge gebunden**: DATAMODEL 0.5.0 / ARCHITECTURE 0.6.0 (Dual-
-Version borg_version "1"/"2") müssen vor Implementierung freigegeben
-werden. Implementierung ruht bis dahin (AGENTS.md-Regel).
+Status: **Implementierung freigegeben** (Auftraggeber bestätigt die
+Ausrichtungs-Fluktuation als normal im Innovationsprojekt und billigt
+das Fortfahren). Verträge DATAMODEL 0.5.0 / ARCHITECTURE 0.6.0 (Dual-
+Version borg_version "1"/"2") bleiben bis zur namentlichen Freigabe als
+ENTWURF markiert; die R-3b-Tranchenfreigabe ist hiermit erteilt.
 
 ## Live-Verifikation (beide Serien, echte Repos)
 
